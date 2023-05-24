@@ -91,7 +91,7 @@ public class Main extends Application{
         primaryStage.show();
         for (int x=0; x<45; x++) {
             if (x%3 == 2) {
-                mainLogic.addCreature(50+(x/3)*30, 100, Dna.pair(mainLogic.getCreature(x-2).getDna(), mainLogic.getCreature(x-1).getDna(), 0, encoder));
+                mainLogic.addCreature(Relationship.breed(mainLogic, 50+(x/3)*30, 100, mainLogic.getCreature(x-2), mainLogic.getCreature(x-1), 0, encoder));
             } else if (x%3 == 0) {
                 mainLogic.addCreature(50+(x/3)*30, 50);
             } else {
@@ -102,12 +102,17 @@ public class Main extends Application{
         }
         for (int x=0; x<45; x++) {
             if (x%3 == 2) {
-                mainLogic.addCreature(50+(x/3)*30, 300, Dna.pair(mainLogic.getCreature(45+x-2).getDna(), mainLogic.getCreature(45+x-1).getDna(), 0, encoder));
+                mainLogic.addCreature(Relationship.breed(mainLogic, 50+(x/3)*30, 300, mainLogic.getCreature(45+x-2), mainLogic.getCreature(45+x-1), 0, encoder));
             } else if (x%3 == 0) {
                 mainLogic.addCreature(50+(x/3)*30, 250);
             } else {
                 mainLogic.addCreature(50+(x/3)*30, 350);
+                mainLogic.getCreature(45+x).addLove(mainLogic.getCreature(45+x-1));
+                mainLogic.getCreature(45+x-1).addLove(mainLogic.getCreature(45+x));
             }
+        }
+        for (int x=0; x<15; x++) {
+            mainLogic.addCreature(Relationship.breed(mainLogic, 50+x*30, 200, mainLogic.getCreature(x*3+2), mainLogic.getCreature(45+x*3+2), 0, encoder));
         }
 
 

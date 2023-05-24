@@ -55,32 +55,6 @@ public class Dna {
         }
     }
 
-    /* 
-    private void encode() {
-        this.proteinDefense = new HashMap<Type, Integer>();
-        this.proteinOffense = new HashMap<Type, Integer>();
-        for (Type type : Type.allTypes()) {
-            this.proteinDefense.put(type, 0);
-            this.proteinOffense.put(type, 0);
-        }
-        String code;
-        Type type;
-        for (int i = 0; i<dna.length()-2-proteinEncodingManager.proteinLenght; i++) {
-            code = dna.substring(i+2, i+2+proteinEncodingManager.proteinLenght);
-            if (encoder.isEncoding(code)) {
-                type = encoder.translate(code);
-                if (this.dna.charAt(i) == '0' && this.dna.charAt(i+1) == '1') {
-                    this.proteinOffense.put(type, this.proteinOffense.get(type)+1);
-                    i += proteinEncodingManager.proteinLenght+1;
-                } else if (this.dna.charAt(i) == '1' && this.dna.charAt(i+1) == '0'){
-                    this.proteinDefense.put(type, this.proteinDefense.get(type)+1);
-                    i += proteinEncodingManager.proteinLenght+1;
-                }
-            }
-        }
-    }
-    */
-
     public void update() {
         encode();
     }

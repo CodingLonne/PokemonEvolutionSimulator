@@ -59,6 +59,16 @@ public class World {
         }
     }
 
+    public void addCreature(Creature c) {
+        allCreatures.add(c);
+        for (CreatureListener listener : creatureListeners) {
+            listener.onCreatureCreate(c);
+        }
+        for (CreatureClickListener listener : creatureClickListeners) {
+            c.addCreatureClickListener(listener);
+        }
+    }
+
     public void updateCreature(Creature c) {
         for (CreatureListener listener : creatureListeners) {
             listener.onCreatureUpdate(c);

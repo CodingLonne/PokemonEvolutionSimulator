@@ -15,6 +15,8 @@ public class Creature implements proteinChangeListener{
     private World world;
 
     private SimpleStringProperty name;
+    private Creature mother;
+    private Creature father;
     private SimpleDoubleProperty health;
     private SimpleDoubleProperty energy;
     private SimpleIntegerProperty age;
@@ -45,7 +47,6 @@ public class Creature implements proteinChangeListener{
         proteinOffense = dna.getOffenseMap();
 
         relationships = new HashMap<>();
-        //(a, b) -> (int) Math.signum(this.getDistanceTo(a)-this.getDistanceTo(b))
         loves = new LinkedList<Creature>();
         enemies = new LinkedList<Creature>();
 
@@ -124,6 +125,14 @@ public class Creature implements proteinChangeListener{
         return enemies;
     }
 
+    public Creature getMother() {
+        return mother;
+    }
+
+    public Creature getFather() {
+        return father;
+    }
+
     //setters
     public void giveName(String name) {
         this.name.set(name);
@@ -147,6 +156,11 @@ public class Creature implements proteinChangeListener{
 
     public void setAge(int a) {
         age.set(a);
+    }
+
+    public void setParents(Creature m, Creature f) {
+        mother = m;
+        father = f;
     }
 
     //adders

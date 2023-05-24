@@ -32,4 +32,10 @@ public class Relationship {
         }
         return differences;
     }
+    
+    public static Creature breed(World world, double x, double y, Creature c1, Creature c2, int mutations, proteinEncodingManager encoder) {
+        Creature child = new Creature(world, x, y, Dna.pair(c1.getDna(), c2.getDna(), mutations, encoder), encoder);
+        child.setParents(c1, c2);
+        return child;
+    }
 }
