@@ -1,0 +1,115 @@
+package evolution;
+
+import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+
+public class Main extends Application{
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    public void start(Stage primaryStage) {
+        //logic
+        NameGenerator nameGranter = new NameGenerator();
+        proteinEncodingManager encoder = new proteinEncodingManager();
+        World mainLogic = new World(600, encoder);
+        //grid
+        BorderPane wholeScreen = new BorderPane();
+        //different screens
+            VisualWorld world = new VisualWorld(600);
+            world.setStyle("-fx-background-color: #238028;");
+        wholeScreen.setCenter(world);
+
+            VBox infoscreens = new VBox();
+            infoscreens.setStyle("-fx-background-color: #F3E5CE;");
+            infoscreens.setPrefSize(550, 600);
+                
+                HBox switchPane = new HBox();
+                switchPane.setAlignment(Pos.CENTER);
+                switchPane.setStyle("-fx-background-color: #D39F4A;");
+                switchPane.setPadding(new Insets(5, 30, 5, 20));
+                switchPane.setPrefSize(550, 70);
+            infoscreens.getChildren().add(switchPane);
+                ScrollPane scroller = new ScrollPane();
+                scroller.setPannable(false);
+                scroller.setFitToWidth(true);
+                scroller.setFitToHeight(true);
+                scroller.setHbarPolicy(ScrollBarPolicy.NEVER);
+                scroller.prefViewportHeightProperty().bind(infoscreens.heightProperty().subtract(switchPane.heightProperty()));
+
+                    TypeStatsDisplay typeStats = new TypeStatsDisplay(encoder, mainLogic);
+                    typeStats.setStyle("-fx-background-color: #EAD2AC;");
+                    typeStats.setPadding(new Insets(5, 30, 5, 20));
+                    typeStats.setPrefWidth(550);
+
+                scroller.setContent(typeStats);
+
+                    Pane creatureOverview = new Pane();
+                    creatureOverview.setStyle("-fx-background-color: #EAD2AC;");
+                    creatureOverview.setPadding(new Insets(5, 30, 5, 20));
+                    creatureOverview.setPrefWidth(550);
+
+                scroller.setContent(creatureOverview);
+
+                    CreatureStats creatureStats = new CreatureStats(encoder);
+                    creatureStats.setStyle("-fx-background-color: #EAD2AC;");
+                    creatureStats.setPadding(new Insets(5, 30, 5, 20));
+                    creatureStats.setPrefWidth(550);
+
+                scroller.setContent(creatureStats);
+                scroller.setContent(typeStats);
+            infoscreens.getChildren().add(scroller);
+                
+
+        wholeScreen.setRight(infoscreens);
+        
+        //setup swappers
+        ScreenManager screenSwapper = new ScreenManager(scroller, switchPane, 3, 
+                                                        new Pane[]{typeStats, creatureOverview, creatureStats}, 
+                                                        new String[]{"types", "creatures", "unnamed"});
+        Scene scene = new Scene(wholeScreen);
+
+        //setup connections
+        mainLogic.addCreatureListener(world);
+        mainLogic.addCreatureListener(typeStats);
+        mainLogic.addWorldListener(world);
+        mainLogic.addCreatureListener(nameGranter);
+        mainLogic.addCreatureClickListener(creatureStats);
+
+        //lset all online
+        primaryStage.setTitle("pokemon evolution");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        for (int x=0; x<45; x++) {
+            if (x%3 == 2) {
+                mainLogic.addCreature(50+(x/3)*30, 100, Dna.pair(mainLogic.getCreature(x-2).getDna(), mainLogic.getCreature(x-1).getDna(), 0, encoder));
+            } else if (x%3 == 0) {
+                mainLogic.addCreature(50+(x/3)*30, 50);
+            } else {
+                mainLogic.addCreature(50+(x/3)*30, 150);
+                mainLogic.getCreature(x).addLove(mainLogic.getCreature(x-1));
+                mainLogic.getCreature(x-1).addLove(mainLogic.getCreature(x));
+            }
+        }
+        for (int x=0; x<45; x++) {
+            if (x%3 == 2) {
+                mainLogic.addCreature(50+(x/3)*30, 300, Dna.pair(mainLogic.getCreature(45+x-2).getDna(), mainLogic.getCreature(45+x-1).getDna(), 0, encoder));
+            } else if (x%3 == 0) {
+                mainLogic.addCreature(50+(x/3)*30, 250);
+            } else {
+                mainLogic.addCreature(50+(x/3)*30, 350);
+            }
+        }
+
+
+    }
+}
