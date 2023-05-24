@@ -1,5 +1,7 @@
 package evolution;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -29,6 +31,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     private Creature selectedCreature;
     private HashMap<Type, SimpleIntegerProperty> typeDefenseData;
     private HashMap<Type, SimpleIntegerProperty> typeOffenseData;
+    private Comparator<Type> byDefense;
+    private Comparator<Type> byOffense;
 
     //visual variables
     private double headerHeight = 60;
@@ -54,6 +58,10 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     private TypePieChart piechartOffense;
     private Label defenseHeader;
     private Label offenseHeader;
+    private HashMap<Type, Label> defenseTypeLabels;
+    private HashMap<Type, Label> offenseTypeLabels;
+    private HashMap<Type, Label> defenseTypeValues;
+    private HashMap<Type, Label> offenseTypeValues;
     CreatureStats(proteinEncodingManager encodingManager) {
         super();
         encodingManager.addListener(this);
@@ -140,14 +148,59 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         typeOverviewSection.setAlignment(Pos.TOP_CENTER);
         typeOverviewSection.minWidthProperty().bind(this.widthProperty().multiply(0.9));
         defenseHeader = new Label("Defense genes");
-        defenseHeader.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
-        typeOverviewSection.add(defenseHeader, 0, 0);
         offenseHeader = new Label("Offense genes");
+        defenseHeader.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
         offenseHeader.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+        typeOverviewSection.add(defenseHeader, 0, 0);
         typeOverviewSection.add(offenseHeader, 2, 0);
+        defenseTypeLabels = new HashMap<Type, Label>();
+        offenseTypeLabels = new HashMap<Type, Label>();
+        defenseTypeValues = new HashMap<Type, Label>();
+        offenseTypeValues = new HashMap<Type, Label>();
+        byDefense = (Type d1, Type d2)->Integer.valueOf(typeDefenseData.get(d1).get()).compareTo(Integer.valueOf(typeDefenseData.get(d2).get()));
+        byOffense = (Type o1, Type o2)->Integer.valueOf(typeOffenseData.get(o1).get()).compareTo(Integer.valueOf(typeOffenseData.get(o2).get()));
+        for (Type t: Type.allTypes()) {
+            defenseTypeLabels.put(t, new Label());
+            offenseTypeLabels.put(t, new Label());
+            defenseTypeValues.put(t, new Label());
+            offenseTypeValues.put(t, new Label());
+            defenseTypeLabels.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+            offenseTypeLabels.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+            defenseTypeValues.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+            offenseTypeValues.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+            defenseTypeValues.get(t).textProperty().bind(typeDefenseData.get(t).asString());
+            offenseTypeValues.get(t).textProperty().bind(typeOffenseData.get(t).asString());
+        }
         this.getChildren().add(typeOverviewSection);
 
         this.minHeightProperty().bind(headerSection.heightProperty().add(basicInfoSection.heightProperty().add(relationshipSection.heightProperty().add(pieChartSection.heightProperty()))).multiply(1.1));
+    }
+
+    public void putTypeValues() {
+        LinkedList<Type> ranklist = new LinkedList<Type>(Arrays.asList(Type.allTypes()));
+        Type t;
+        //defense
+        ranklist.sort(byDefense);
+        for (int i=0; i<ranklist.size(); i++) {
+            t = ranklist.get(i);
+            typeOverviewSection.add(defenseTypeLabels.get(t), 0, i+1);
+            typeOverviewSection.add(defenseTypeValues.get(t), 1, i+1);
+        }
+        //offense
+        ranklist.sort(byOffense);
+        for (int i=0; i<ranklist.size(); i++) {
+            t = ranklist.get(i);
+            typeOverviewSection.add(offenseTypeLabels.get(t), 2, i+1);
+            typeOverviewSection.add(offenseTypeValues.get(t), 3, i+1);
+        }
+    }
+    public void removeTypeValues() {
+        for (Type t: Type.allTypes()) {
+            typeOverviewSection.getChildren().remove(defenseTypeLabels.get(t));
+            typeOverviewSection.getChildren().remove(offenseTypeLabels.get(t));
+            typeOverviewSection.getChildren().remove(defenseTypeValues.get(t));
+            typeOverviewSection.getChildren().remove(offenseTypeValues.get(t));
+        }
     }
 
     public HashMap<Type, SimpleIntegerProperty> setUpTypePiechartData() {
@@ -207,6 +260,7 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
             typeDefenseData.get(t).set(0);
             typeOffenseData.get(t).set(0);
         }
+        removeTypeValues();
     }
 
     public void connectTypeMapTo(Creature c) {
@@ -224,6 +278,7 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         energyInfo.textProperty().bind(Bindings.concat("Energy: ", c.energyProperty().asString()));
         ageInfo.textProperty().bind(Bindings.concat("Age: ", c.ageProperty().asString()));
         connectTypeMapTo(c);
+        putTypeValues();
     }
     
     public void setCreature(Creature c) {
