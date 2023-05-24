@@ -147,6 +147,7 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         typeOverviewSection.setStyle("-fx-background-color: #EFDCBD;");
         typeOverviewSection.setAlignment(Pos.TOP_CENTER);
         typeOverviewSection.minWidthProperty().bind(this.widthProperty().multiply(0.9));
+        typeOverviewSection.setHgap(10);
         defenseHeader = new Label("Defense genes");
         offenseHeader = new Label("Offense genes");
         defenseHeader.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
@@ -157,23 +158,27 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         offenseTypeLabels = new HashMap<Type, Label>();
         defenseTypeValues = new HashMap<Type, Label>();
         offenseTypeValues = new HashMap<Type, Label>();
-        byDefense = (Type d1, Type d2)->Integer.valueOf(typeDefenseData.get(d1).get()).compareTo(Integer.valueOf(typeDefenseData.get(d2).get()));
-        byOffense = (Type o1, Type o2)->Integer.valueOf(typeOffenseData.get(o1).get()).compareTo(Integer.valueOf(typeOffenseData.get(o2).get()));
+        byDefense = (Type d1, Type d2)->Integer.valueOf(typeDefenseData.get(d2).get()).compareTo(Integer.valueOf(typeDefenseData.get(d1).get()));
+        byOffense = (Type o1, Type o2)->Integer.valueOf(typeOffenseData.get(o2).get()).compareTo(Integer.valueOf(typeOffenseData.get(o1).get()));
         for (Type t: Type.allTypes()) {
-            defenseTypeLabels.put(t, new Label());
-            offenseTypeLabels.put(t, new Label());
+            defenseTypeLabels.put(t, new Label(t.toString()));
+            offenseTypeLabels.put(t, new Label(t.toString()));
             defenseTypeValues.put(t, new Label());
             offenseTypeValues.put(t, new Label());
-            defenseTypeLabels.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-            offenseTypeLabels.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-            defenseTypeValues.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-            offenseTypeValues.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+            defenseTypeLabels.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+            offenseTypeLabels.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+            defenseTypeValues.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+            offenseTypeValues.get(t).setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
             defenseTypeValues.get(t).textProperty().bind(typeDefenseData.get(t).asString());
             offenseTypeValues.get(t).textProperty().bind(typeOffenseData.get(t).asString());
+            defenseTypeLabels.get(t).setTextFill(t.getColor());
+            offenseTypeLabels.get(t).setTextFill(t.getColor());
+            //defenseTypeValues.get(t).setTextFill(t.getColor());
+            //offenseTypeValues.get(t).setTextFill(t.getColor());
         }
         this.getChildren().add(typeOverviewSection);
 
-        this.minHeightProperty().bind(headerSection.heightProperty().add(basicInfoSection.heightProperty().add(relationshipSection.heightProperty().add(pieChartSection.heightProperty()))).multiply(1.1));
+        this.minHeightProperty().bind(headerSection.heightProperty().add(basicInfoSection.heightProperty().add(relationshipSection.heightProperty().add(pieChartSection.heightProperty().add(typeOverviewSection.heightProperty())))).multiply(1.1));
     }
 
     public void putTypeValues() {
@@ -183,15 +188,19 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         ranklist.sort(byDefense);
         for (int i=0; i<ranklist.size(); i++) {
             t = ranklist.get(i);
-            typeOverviewSection.add(defenseTypeLabels.get(t), 0, i+1);
-            typeOverviewSection.add(defenseTypeValues.get(t), 1, i+1);
+            if (typeDefenseData.get(t).get() > 0) {
+                typeOverviewSection.add(defenseTypeLabels.get(t), 0, i+1);
+                typeOverviewSection.add(defenseTypeValues.get(t), 1, i+1);
+            }
         }
         //offense
         ranklist.sort(byOffense);
         for (int i=0; i<ranklist.size(); i++) {
             t = ranklist.get(i);
-            typeOverviewSection.add(offenseTypeLabels.get(t), 2, i+1);
-            typeOverviewSection.add(offenseTypeValues.get(t), 3, i+1);
+            if (typeOffenseData.get(t).get() > 0) {
+                typeOverviewSection.add(offenseTypeLabels.get(t), 2, i+1);
+                typeOverviewSection.add(offenseTypeValues.get(t), 3, i+1);
+            }
         }
     }
     public void removeTypeValues() {
@@ -294,6 +303,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     public void OnCreatureClick(Creature c) {
         setCreature(c);
         creatureSelected.set(true);
+        //attempted fix at gridheight not updating on creature change.
+        this.setHeight((headerSection.getHeight()+basicInfoSection.getHeight()+relationshipSection.getHeight()+pieChartSection.getHeight()+typeOverviewSection.getHeight())*1.1);
     }
 }
 

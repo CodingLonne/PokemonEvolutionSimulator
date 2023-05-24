@@ -148,6 +148,7 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
         //Gene Type Chart
         geneModifyingSection = new HBox();
         geneTypeChart = new GridPane();
+        geneTypeChart.setStyle("-fx-background-color: #EFDCBD;");
         geneTypeChart.setAlignment(Pos.CENTER);
             //genes
             Label GeneColumnName = new Label("Genes");
