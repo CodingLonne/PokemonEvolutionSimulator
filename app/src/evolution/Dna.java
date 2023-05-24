@@ -42,15 +42,15 @@ public class Dna {
                 if (encoder.isEncoding(code)) {
                     type = encoder.translate(code);
                     this.proteinOffense.put(type, this.proteinOffense.get(type)+1);
-                    i += proteinEncodingManager.proteinLenght+offenseInit.length()-1;
                 }
+                i += proteinEncodingManager.proteinLenght+offenseInit.length()-1;
             } else if (this.dna.substring(i, i+defenseInit.length()).equals(defenseInit)) {
                 code = dna.substring(i+defenseInit.length(), i+defenseInit.length()+proteinEncodingManager.proteinLenght);
                 if (encoder.isEncoding(code)) {
                     type = encoder.translate(code);
                     this.proteinDefense.put(type, this.proteinDefense.get(type)+1);
-                    i += proteinEncodingManager.proteinLenght+defenseInit.length()-1;
                 }
+                i += proteinEncodingManager.proteinLenght+defenseInit.length()-1;
             }
         }
     }
