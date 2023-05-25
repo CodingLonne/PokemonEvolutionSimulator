@@ -84,6 +84,7 @@ public class Main extends Application{
         mainLogic.addWorldListener(world);
         mainLogic.addCreatureListener(nameGranter);
         mainLogic.addCreatureClickListener(creatureStats);
+        mainLogic.addCreatureClickListener(screenSwapper);
 
         //lset all online
         primaryStage.setTitle("pokemon evolution");

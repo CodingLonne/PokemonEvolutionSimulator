@@ -1,5 +1,6 @@
 package evolution;
 
+import evolution.World.CreatureClickListener;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -19,7 +20,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 
-public class ScreenManager {
+public class ScreenManager implements CreatureClickListener{
     private ScrollPane background;
     private Pane switchPane;
     private int options;
@@ -109,5 +110,9 @@ public class ScreenManager {
                 buttons[i].setBorder(new Border(new BorderStroke(Color.rgb(47, 84, 117), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(4))));
             }
         }
+    }
+    @Override
+    public void OnCreatureClick(Creature c) {
+        switchPage(2);
     }
 }
