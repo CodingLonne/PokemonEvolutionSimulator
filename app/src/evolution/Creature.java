@@ -26,6 +26,7 @@ public class Creature implements proteinChangeListener{
 
     private LinkedList<Creature> loves;
     private LinkedList<Creature> enemies;
+    private LinkedList<Creature> children;
     private HashMap<Creature, Relation> relationships;
 
     private HashMap<Type, Integer> proteinDefense;
@@ -49,6 +50,7 @@ public class Creature implements proteinChangeListener{
         relationships = new HashMap<>();
         loves = new LinkedList<Creature>();
         enemies = new LinkedList<Creature>();
+        children = new LinkedList<Creature>();
 
         encoder.addListener(this);
         creatureClickListeners = new LinkedList<>();
@@ -125,6 +127,10 @@ public class Creature implements proteinChangeListener{
         return enemies;
     }
 
+    public LinkedList<Creature> getChildren() {
+        return enemies;
+    }
+
     public Creature getMother() {
         return mother;
     }
@@ -170,6 +176,10 @@ public class Creature implements proteinChangeListener{
 
     public void addEnemy(Creature c) {
         enemies.add(c);
+    }
+
+    public void addChild(Creature c) {
+        children.add(c);
     }
 
     //property getters

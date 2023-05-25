@@ -52,6 +52,7 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     private HBox pieChartSection;
     private GridPane typeOverviewSection;
     private GridPane familyTreeSection;
+    private VBox childrenList;
 
     //components
     private Label titleLabel;
