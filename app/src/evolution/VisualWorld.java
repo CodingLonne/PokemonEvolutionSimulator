@@ -14,8 +14,13 @@ public class VisualWorld extends Pane implements World.CreatureListener, World.W
     private SimpleIntegerProperty centerX;
     private SimpleIntegerProperty centerY;
     private SimpleIntegerProperty radius;
-    HashMap<Creature, CreatureBody> creatureBodies;
-    SimpleIntegerProperty day;
+    private HashMap<Creature, CreatureBody> creatureBodies;
+    private SimpleIntegerProperty day;
+
+    private int backgroundFieldLayer = 10;
+    private int heartLayer = 5;
+    private int attackLayer = 4;
+    private int creatureLayer = 3;
 
     VisualWorld(int size) {
         this.setPrefWidth(size);
@@ -31,6 +36,7 @@ public class VisualWorld extends Pane implements World.CreatureListener, World.W
         radius.bind(Bindings.min(this.widthProperty(), this.heightProperty()).divide(2));
         field.radiusProperty().bind(radius);
         field.setFill(Color.rgb(159, 229, 162));
+        field.setViewOrder(backgroundFieldLayer);
         this.getChildren().add(field);
         creatureBodies = new HashMap<Creature, CreatureBody>();
         this.day = new SimpleIntegerProperty(0);
@@ -53,6 +59,7 @@ public class VisualWorld extends Pane implements World.CreatureListener, World.W
             }
             
         });
+        body.setViewOrder(creatureLayer);
         creatureBodies.put(c, body);
         this.getChildren().add(body);
     }

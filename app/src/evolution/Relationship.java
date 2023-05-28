@@ -8,7 +8,7 @@ public class Relationship {
     public static Relation evaluate(Creature c1, Creature c2, int day) {
         String dna1 = c1.getDna().getDna();
         String dna2 = c2.getDna().getDna();
-        if (dna1.charAt(day) == dna2.charAt(day)) { //they have positive/neutral relation if they're the same and negative/neutral if not
+        if (dna1.charAt(day%dna1.length()) == dna2.charAt(day%dna2.length())) { //they have positive/neutral relation if they're the same and negative/neutral if not
             if (compareDna(dna1, dna2) < treshhold) { //their difference has to be small for large emotions
                 return Relation.LOVE;
             } else {

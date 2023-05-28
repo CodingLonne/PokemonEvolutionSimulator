@@ -1,7 +1,4 @@
-dna mutation settings:
-    how many mutations
 type settings
-    how advantageous is type advantage
     change encodings
 Creature info
     2 pie charts of types, attack&defense
@@ -20,6 +17,16 @@ miscelaneous
     day
     pause button
     speed dials
+fighting
+    how advantageous is type advantage
+    how close together you have to be to attack
+    age influence?
+    advantage chart
+    agressivity 0-1
+breeding
+    how many mutations
+    how close together you have to be to breed
     choose alternative file to pick names from.
+    attraction 0-10
 colorscheme
     https://coolors.co/4fcf55-55dde0-2f5475-f26419-d39f4a

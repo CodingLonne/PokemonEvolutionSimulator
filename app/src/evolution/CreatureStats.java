@@ -52,7 +52,7 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     private HBox pieChartSection;
     private GridPane typeOverviewSection;
     private GridPane familyTreeSection;
-    private VBox childrenList;
+    private GridPane childrenList;
 
     //components
     private Label titleLabel;
@@ -334,8 +334,12 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         selfSection.setAlignment(Pos.TOP_CENTER);
         familyTreeSection.add(selfSection, 0, 3);
         GridPane.setColumnSpan(selfSection, 4);
-
         this.getChildren().add(familyTreeSection);
+        //children
+        childrenList = new GridPane();
+        HeartShape heart = new HeartShape(70, Color.RED);
+        childrenList.add(heart.getShapeToShow(), 1, 0);
+        this.getChildren().add(childrenList);
         //height
         this.minHeightProperty().bind(headerSection.heightProperty().add(basicInfoSection.heightProperty().add(relationshipSection.heightProperty().add(pieChartSection.heightProperty().add(typeOverviewSection.heightProperty().add(familyTreeSection.heightProperty()))))).multiply(1.1));
     }

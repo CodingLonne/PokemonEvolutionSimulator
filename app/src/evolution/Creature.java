@@ -128,7 +128,7 @@ public class Creature implements proteinChangeListener{
     }
 
     public LinkedList<Creature> getChildren() {
-        return enemies;
+        return children;
     }
 
     public Creature getMother() {

@@ -7,6 +7,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -116,6 +118,11 @@ public class Main extends Application{
             mainLogic.addCreature(Relationship.breed(mainLogic, 50+x*30, 200, mainLogic.getCreature(x*3+2), mainLogic.getCreature(45+x*3+2), 0, encoder));
         }
 
-
+        int c1 = 11;
+        int c2 = 16;
+        HeartShape heart = new HeartShape(mainLogic.getCreature(c1).getX(), mainLogic.getCreature(c1).getY(), 
+                                          mainLogic.getCreature(c2).getX(), mainLogic.getCreature(c2).getY(), Color.RED);
+        world.getChildren().add(heart.getShapeToShow());
+        heart.getShapeToShow().setViewOrder(5);
     }
 }

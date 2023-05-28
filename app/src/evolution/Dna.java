@@ -13,8 +13,8 @@ public class Dna {
 
     private String defenseInit = "10";
     private String offenseInit = "01";
-    //private String defenseInit = "01";
-    //private String offenseInit = "10";
+    //private String defenseInit = "";
+    //private String offenseInit = "";
 
     private HashMap<Type, Integer> proteinDefense;
     private HashMap<Type, Integer> proteinOffense;
