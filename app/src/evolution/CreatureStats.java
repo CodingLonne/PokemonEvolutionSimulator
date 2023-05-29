@@ -125,7 +125,6 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         relationshipSection = new GridPane();
         relationshipSection.setStyle("-fx-background-color: #EFDCBD;");
         relationshipSection.setAlignment(Pos.TOP_CENTER);
-        //relationshipSection.minWidthProperty().bind(this.widthProperty().multiply(0.9));
         relationshipSection.prefWidthProperty().bind(this.widthProperty().multiply(0.9));
             //header
             Label relationShipLabel = new Label("relationShips");
@@ -410,8 +409,7 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     }
 
     public void updateChildrenList(Creature c) {
-        int maxInfra = childLabels.size();
-        //int maxInfra = Math.min(Math.min(Math.min(mothersLabels.size(), fatherLabels.size()), childLabels.size()), Math.min(loveLabels.size(), resultLabels.size()));
+        int maxInfra = Math.min(Math.min(Math.min(mothersLabels.size(), fatherLabels.size()), childLabels.size()), Math.min(loveLabels.size(), resultLabels.size()));
         if (c != null) {
             LinkedList<Creature> children = c.getChildren();
             children.sort((x, y) -> y.getAge()-x.getAge());
