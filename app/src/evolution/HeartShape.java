@@ -59,4 +59,8 @@ public class HeartShape {
         return heart;
     }
 
+    public double getWidth() {
+        return width;
+    }
+
 }

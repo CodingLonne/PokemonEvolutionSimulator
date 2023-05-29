@@ -118,8 +118,8 @@ public class Main extends Application{
             mainLogic.addCreature(Relationship.breed(mainLogic, 50+x*30, 200, mainLogic.getCreature(x*3+2), mainLogic.getCreature(45+x*3+2), 0, encoder));
         }
 
-        int c1 = 11;
-        int c2 = 16;
+        int c1 = 1;
+        int c2 = 3;
         HeartShape heart = new HeartShape(mainLogic.getCreature(c1).getX(), mainLogic.getCreature(c1).getY(), 
                                           mainLogic.getCreature(c2).getX(), mainLogic.getCreature(c2).getY(), Color.RED);
         world.getChildren().add(heart.getShapeToShow());
