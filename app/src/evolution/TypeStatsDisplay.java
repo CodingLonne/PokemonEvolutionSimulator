@@ -120,7 +120,7 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
         this.world = world;
         this.encodingManager = encodingManager;
         encodingManager.addListener(this);
-        title = new SimpleStringProperty("Type statistics");
+        title = new SimpleStringProperty("types");
         //piechart section
         typeDefenseData = setUpTypePiechartData();
         typeOffenseData = setUpTypePiechartData();
@@ -288,19 +288,19 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
             //link up
             //d1.visibleProperty().bind(piechartDefense.getFraction(currentType).isNotEqualTo(0));
             d1.textProperty().bind(
-                Bindings.when(piechartDefense.getFraction(currentType).isEqualTo(0)).
+                Bindings.when(piechartDefense.fractionProperty(currentType).isEqualTo(0)).
                 then("-").
                 otherwise(Bindings.createDoubleBinding(
-                            () -> (double) Math.round(piechartDefense.getFraction(currentType).doubleValue()*1000)/10, 
-                            piechartDefense.getFraction(currentType))
+                            () -> (double) Math.round(piechartDefense.fractionProperty(currentType).doubleValue()*1000)/10, 
+                            piechartDefense.fractionProperty(currentType))
                         .asString().concat("%")));
             //o1.visibleProperty().bind(piechartOffense.getFraction(currentType).isNotEqualTo(0));
             o1.textProperty().bind(
-                Bindings.when(piechartOffense.getFraction(currentType).isEqualTo(0)).
+                Bindings.when(piechartOffense.fractionProperty(currentType).isEqualTo(0)).
                 then("-").
                 otherwise(Bindings.createDoubleBinding(
-                            () -> (double) Math.round(piechartOffense.getFraction(currentType).doubleValue()*1000)/10, 
-                            piechartOffense.getFraction(currentType))
+                            () -> (double) Math.round(piechartOffense.fractionProperty(currentType).doubleValue()*1000)/10, 
+                            piechartOffense.fractionProperty(currentType))
                         .asString().concat("%")));
             //add to grid
             grid.add(d1, 2, y+1);

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import evolution.Relationship.Relation;
 import evolution.World.CreatureClickListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,6 +21,7 @@ public class Creature implements proteinChangeListener{
     private SimpleDoubleProperty health;
     private SimpleDoubleProperty energy;
     private SimpleIntegerProperty age;
+    private SimpleBooleanProperty alive;
     private double horniness;
     private SimpleDoubleProperty xProperty;
     private SimpleDoubleProperty yProperty;
@@ -42,6 +44,7 @@ public class Creature implements proteinChangeListener{
         this.age = new SimpleIntegerProperty(0);
         this.health = new SimpleDoubleProperty(health);
         this.energy = new SimpleDoubleProperty(energy);
+        this.alive = new SimpleBooleanProperty(true);
         this.horniness = 0d;
 
         proteinDefense = dna.getDefenseMap();
@@ -111,6 +114,10 @@ public class Creature implements proteinChangeListener{
         return age.get();
     }
 
+    public boolean getAlive() {
+        return alive.get();
+    }
+
     public HashMap<Type, Integer> getDefenseMap() {
         return proteinDefense;
     }
@@ -164,6 +171,10 @@ public class Creature implements proteinChangeListener{
         age.set(a);
     }
 
+    public void setAlive(boolean b) {
+        alive.set(b);
+    }
+
     public void setParents(Creature m, Creature f) {
         mother = m;
         father = f;
@@ -205,6 +216,10 @@ public class Creature implements proteinChangeListener{
 
     public SimpleIntegerProperty ageProperty() {
         return age;
+    }
+
+    public SimpleBooleanProperty aliveProperty() {
+        return alive;
     }
     //listeners
     public void addCreatureClickListener(CreatureClickListener listener) {

@@ -1,32 +1,70 @@
-type settings
-    change encodings
-Creature info
-    2 pie charts of types, attack&defense
-    health
-    energy
-    relationships (+ distances)
-    father and mother, (maybe grandparents too, children??)
-    dead or alive (color scheme differ)
-    age
-creature management
-    avg age
-    arrived home
-    add creature
-    type pie chart;
-miscelaneous
-    day
-    pause button
-    speed dials
-fighting
-    how advantageous is type advantage
-    how close together you have to be to attack
-    age influence?
-    advantage chart
-    agressivity 0-1
-breeding
-    how many mutations
-    how close together you have to be to breed
-    choose alternative file to pick names from.
-    attraction 0-10
-colorscheme
-    https://coolors.co/4fcf55-55dde0-2f5475-f26419-d39f4a
+visual data elements to implement:
+    type settings
+        change encodings
+    Creature info
+        2 pie charts of types, attack&defense
+        health
+        energy
+        relationships (+ distances)
+        father and mother, grandparents
+        children
+        dead or alive (color scheme differ)
+        age
+    creature management
+        avg age
+        arrived home
+        add creature
+        type pie chart;
+    miscelaneous
+        day
+        pause button
+        speed dials
+    fighting
+        how advantageous is type advantage
+        how close together you have to be to attack
+        age influence?
+        advantage chart
+        agressivity 0-1
+    breeding
+        how many mutations
+        how close together you have to be to breed
+        choose alternative file to pick names from.
+        attraction 0-10
+    colorscheme
+        https://coolors.co/4fcf55-55dde0-2f5475-f26419-d39f4a
+
+Screens
+    display screen 
+        day
+        pause button
+        speed dials
+    genes (done)
+        gene piecharts 
+        shortcut to set preferred setting
+        change encodings
+    creature overview
+        avg age
+        arrived home 10/10
+        add creature
+        type pie chart;
+        list of all creatures
+    individual creature (done)
+        name
+        health
+        energy
+        age
+        relationships (+ distances)
+        2 pie charts of types, attack&defense
+        father and mother, grandparents, children)
+        dead or alive (color scheme differ)
+    breeding
+        how many mutations
+        how close together you have to be to breed
+        choose alternative file to pick names from.
+        attraction 0-10
+    fighting
+        how advantageous is type advantage
+        how close together you have to be to attack
+        age influence?
+        advantage chart
+        agressivity 0-1

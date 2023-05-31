@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import evolution.ScreenManager.screenManagerOwned;
+import evolution.VisualElements.HeartShape;
 import evolution.World.CreatureClickListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.binding.Bindings;
@@ -49,6 +50,7 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     private int maxRelationshipList = 5;
     private double familyTreeLabelHeight = 50;
     private int symbolSize = 45;
+    private SimpleBooleanProperty alive;
     
     //boxes
     private HBox headerSection;
@@ -93,11 +95,13 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         encodingManager.addListener(this);
         title = new SimpleStringProperty("individual stats");
         creatureSelected = new SimpleBooleanProperty(false);
+        alive = new SimpleBooleanProperty(true);
 
         //graphics
         this.setPadding(new Insets(4, 5, 4, 5));
         this.setSpacing(30);
-        this.setStyle("-fx-background-color: #ff0000;");
+        this.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(Color.rgb(234, 210, 172), null, new Insets(0)))).otherwise(new Background(new BackgroundFill(Color.rgb(234, 210, 172).grayscale(), null, new Insets(0)))));
+        this.styleProperty().bind(Bindings.when(alive).then("-fx-background-color: #EAD2AC;").otherwise(""));
         this.setAlignment(Pos.TOP_CENTER);
         //header
         headerSection = new HBox();
@@ -105,9 +109,6 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         titleLabel = new Label();
         titleLabel.textProperty().bind(Bindings.when(creatureSelected).then(title).otherwise("-"));
         titleLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 40));
-        if (selectedCreature != null) {
-            titleLabel.setTextFill(selectedCreature.mostProminentType().getColor());
-        }
         headerSection.getChildren().add(titleLabel);
         headerSection.setPrefHeight(headerHeight);
         this.getChildren().add(headerSection);
@@ -123,16 +124,18 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         this.getChildren().add(basicInfoSection);
         //enemies and lovers
         relationshipSection = new GridPane();
-        relationshipSection.setStyle("-fx-background-color: #EFDCBD;");
+        relationshipSection.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(Color.rgb(239, 220, 189), null, new Insets(0))))
+                                                                          .otherwise(new Background(new BackgroundFill(Color.rgb(239, 220, 189).grayscale(), null, new Insets(0)))));
         relationshipSection.setAlignment(Pos.TOP_CENTER);
         relationshipSection.prefWidthProperty().bind(this.widthProperty().multiply(0.9));
             //header
-            Label relationShipLabel = new Label("relationShips");
+            Label relationShipLabel = new Label("Relationships");
             relationShipLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
             relationShipLabel.setAlignment(Pos.BOTTOM_CENTER);
             VBox relationShipHeader = new VBox(relationShipLabel);
-            relationShipHeader.setBackground(new Background(new BackgroundFill(Color.rgb(249, 111, 93), new CornerRadii(0), new Insets(0))));
-            relationShipHeader.setBorder(new Border(new BorderStroke(Color.rgb(224, 56, 34), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))));
+            relationShipHeader.setAlignment(Pos.TOP_CENTER);
+            relationShipHeader.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(Color.rgb(249, 111, 93), new CornerRadii(0), new Insets(0)))).otherwise(new Background(new BackgroundFill(Color.rgb(249, 111, 93).grayscale(), new CornerRadii(0), new Insets(0)))));
+            relationShipHeader.borderProperty().bind(Bindings.when(alive).then(new Border(new BorderStroke(Color.rgb(224, 56, 34), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))).otherwise(new Border(new BorderStroke(Color.rgb(224, 56, 34).grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
             relationShipHeader.prefWidthProperty().bind(relationshipSection.widthProperty());
             relationshipSection.add(relationShipHeader, 0, 0);
             GridPane.setColumnSpan(relationShipHeader, 4);
@@ -180,22 +183,31 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         typeOffenseData = setUpTypePiechartData();
         piechartDefense = new TypePieChart(typeDefenseData, this.widthProperty().divide(2), "Defense", "No Data\nfound");
         piechartOffense = new TypePieChart(typeOffenseData, this.widthProperty().divide(2), "Offense", "No Data\nfound");
+        piechartDefense.desaturatedProperty().bind(alive.not());
+        piechartOffense.desaturatedProperty().bind(alive.not());
         pieChartSection = new HBox(piechartDefense, piechartOffense);
         this.getChildren().add(pieChartSection);
         //type overview
         typeOverviewSection = new GridPane();
-        typeOverviewSection.setStyle("-fx-background-color: #EFDCBD;");
+        typeOverviewSection.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(Color.rgb(239, 220, 189), null, new Insets(0))))
+                                                                          .otherwise(new Background(new BackgroundFill(Color.rgb(239, 220, 189).grayscale(), null, new Insets(0)))));
         typeOverviewSection.setAlignment(Pos.TOP_CENTER);
         typeOverviewSection.minWidthProperty().bind(this.widthProperty().multiply(0.9));
         typeOverviewSection.setHgap(10);
-        Label typeHeaderLabel = new Label("overview of all genes");
-        typeHeaderLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
-        VBox typeDistributionHeader = new VBox(typeHeaderLabel);
-        typeDistributionHeader.setBackground(new Background(new BackgroundFill(Color.rgb(169, 76, 169), new CornerRadii(0), new Insets(0))));
-        typeDistributionHeader.setBorder(new Border(new BorderStroke(Color.rgb(113, 51, 113), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))));
-        typeDistributionHeader.prefWidthProperty().bind(typeOverviewSection.widthProperty());
-        GridPane.setColumnSpan(typeDistributionHeader, 4);
-        typeOverviewSection.add(typeDistributionHeader, 0, 0);
+            Label typeHeaderLabel = new Label("Overview of all genes");
+            typeHeaderLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+            VBox typeDistributionHeader = new VBox(typeHeaderLabel);
+            typeDistributionHeader.setAlignment(Pos.TOP_CENTER);
+            typeDistributionHeader.backgroundProperty().bind(Bindings.when(alive)
+                .then(new Background(new BackgroundFill(Color.rgb(169, 76, 169), new CornerRadii(0), new Insets(0))))
+                .otherwise(new Background(new BackgroundFill(Color.rgb(169, 76, 169).grayscale(), new CornerRadii(0), new Insets(0)))));
+            typeDistributionHeader.borderProperty().bind(Bindings.when(alive)
+                .then(new Border(new BorderStroke(Color.rgb(113, 51, 113), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))))
+                .otherwise(new Border(new BorderStroke(Color.rgb(113, 51, 113).grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
+            typeDistributionHeader.prefWidthProperty().bind(typeOverviewSection.widthProperty());
+            GridPane.setColumnSpan(typeDistributionHeader, 4);
+            typeOverviewSection.add(typeDistributionHeader, 0, 0);
+
         defenseHeaderLabel = new Label("Defense genes");
         offenseHeaderLabel = new Label("Offense genes");
         defenseHeaderLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
@@ -221,8 +233,14 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
             offenseTypeValues.get(t).textProperty().bind(typeOffenseData.get(t).asString());
             defenseTypeValues.get(t).setAlignment(Pos.CENTER_RIGHT);
             offenseTypeValues.get(t).setAlignment(Pos.CENTER_RIGHT);
-            defenseTypeLabels.get(t).setTextFill(t.getColor());
-            offenseTypeLabels.get(t).setTextFill(t.getColor());
+            //defenseTypeLabels.get(t).setTextFill(t.getColor());
+            defenseTypeLabels.get(t).textFillProperty().bind(Bindings.when(alive)
+                .then(t.getColor())
+                .otherwise(t.getColor().desaturate()));
+            //offenseTypeLabels.get(t).setTextFill(t.getColor());
+            offenseTypeLabels.get(t).textFillProperty().bind(Bindings.when(alive)
+                .then(t.getColor())
+                .otherwise(t.getColor().desaturate()));
         }
         this.getChildren().add(typeOverviewSection);
         //predecessor overview
@@ -235,149 +253,51 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         familyTreeHeaderLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
         familyTreeHeaderLabel.setAlignment(Pos.BOTTOM_CENTER);
         VBox familyTreeHeader = new VBox(familyTreeHeaderLabel);
-        familyTreeHeader.setBackground(new Background(new BackgroundFill(Color.rgb(79, 207, 85), new CornerRadii(0), new Insets(0))));
-        familyTreeHeader.setBorder(new Border(new BorderStroke(Color.rgb(35, 128, 40), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))));
+        familyTreeHeader.setAlignment(Pos.TOP_CENTER);
+        familyTreeHeader.backgroundProperty().bind(Bindings.when(alive)
+            .then(new Background(new BackgroundFill(Color.rgb(79, 207, 85), new CornerRadii(0), new Insets(0))))
+            .otherwise(new Background(new BackgroundFill(Color.rgb(79, 207, 85).grayscale(), new CornerRadii(0), new Insets(0)))));
+        familyTreeHeader.borderProperty().bind(Bindings.when(alive)
+            .then(new Border(new BorderStroke(Color.rgb(35, 128, 40), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))))
+            .otherwise(new Border(new BorderStroke(Color.rgb(35, 128, 40).grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
         familyTreeSection.add(familyTreeHeader, 0, 0);
         GridPane.setColumnSpan(familyTreeHeader, 4);
 
         GrandMotherMothersSideLabel = new CreatureLabel(null);
-        GrandMotherMothersSideLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        GrandMotherMothersSideLabel.setAlignment(Pos.BOTTOM_CENTER);
-        GrandMotherMothersSideLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (GrandMotherMothersSideLabel.getCreature() != null) {
-                    setCreature(GrandMotherMothersSideLabel.getCreature());
-                }
-            }
-            
-        });
         VBox GrandMotherMothersSideSection = new VBox(GrandMotherMothersSideLabel);
-        GrandMotherMothersSideSection.setBackground(new Background(new BackgroundFill(Color.rgb(239, 220, 189), new CornerRadii(0), new Insets(0))));
-        GrandMotherMothersSideSection.setBorder(new Border(new BorderStroke(Color.rgb(231, 203, 156), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))));
-        GrandMotherMothersSideSection.prefWidthProperty().bind(familyTreeSection.widthProperty().divide(4));
-        GrandMotherMothersSideSection.setPrefHeight(familyTreeLabelHeight);
-        GrandMotherMothersSideSection.setPadding(new Insets(0, 5, 0, 5));
-        GrandMotherMothersSideSection.setAlignment(Pos.TOP_CENTER);
+        styleFamilyTreeBlock(GrandMotherMothersSideLabel, GrandMotherMothersSideSection, 4, 20);
         familyTreeSection.add(GrandMotherMothersSideSection, 0, 1);
 
         GrandFatherMothersSideLabel = new CreatureLabel(null);
-        GrandFatherMothersSideLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        GrandFatherMothersSideLabel.setAlignment(Pos.BOTTOM_CENTER);
-        GrandFatherMothersSideLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (GrandFatherMothersSideLabel.getCreature() != null) {
-                    setCreature(GrandFatherMothersSideLabel.getCreature());
-                }
-            }
-            
-        });
         VBox GrandFatherMothersSideSection = new VBox(GrandFatherMothersSideLabel);
-        GrandFatherMothersSideSection.setBackground(new Background(new BackgroundFill(Color.rgb(239, 220, 189), new CornerRadii(0), new Insets(0))));
-        GrandFatherMothersSideSection.setBorder(new Border(new BorderStroke(Color.rgb(231, 203, 156), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))));
-        GrandFatherMothersSideSection.prefWidthProperty().bind(familyTreeSection.widthProperty().divide(4));
-        GrandFatherMothersSideSection.setPrefHeight(familyTreeLabelHeight);
-        GrandFatherMothersSideSection.setPadding(new Insets(0, 5, 0, 5));
-        GrandFatherMothersSideSection.setAlignment(Pos.TOP_CENTER);
+        styleFamilyTreeBlock(GrandFatherMothersSideLabel, GrandFatherMothersSideSection, 4, 20);
         familyTreeSection.add(GrandFatherMothersSideSection, 1, 1);
 
         GrandMotherFathersSideLabel = new CreatureLabel(null);
-        GrandMotherFathersSideLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        GrandMotherFathersSideLabel.setAlignment(Pos.BOTTOM_CENTER);
-        GrandMotherFathersSideLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (GrandMotherFathersSideLabel.getCreature() != null) {
-                    setCreature(GrandMotherFathersSideLabel.getCreature());
-                }
-            }
-            
-        });
         VBox GrandMotherFathersSideSection = new VBox(GrandMotherFathersSideLabel);
-        GrandMotherFathersSideSection.setBackground(new Background(new BackgroundFill(Color.rgb(239, 220, 189), new CornerRadii(0), new Insets(0))));
-        GrandMotherFathersSideSection.setBorder(new Border(new BorderStroke(Color.rgb(231, 203, 156), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))));
-        GrandMotherFathersSideSection.prefWidthProperty().bind(familyTreeSection.widthProperty().divide(4));
-        GrandMotherFathersSideSection.setPrefHeight(familyTreeLabelHeight);
-        GrandMotherFathersSideSection.setPadding(new Insets(0, 5, 0, 5));
-        GrandMotherFathersSideSection.setAlignment(Pos.TOP_CENTER);
+        styleFamilyTreeBlock(GrandMotherFathersSideLabel, GrandMotherFathersSideSection, 4, 20);
         familyTreeSection.add(GrandMotherFathersSideSection, 2, 1);
 
         GrandFatherFathersSideLabel = new CreatureLabel(null);
-        GrandFatherFathersSideLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-        GrandFatherFathersSideLabel.setAlignment(Pos.BOTTOM_CENTER);
-        GrandFatherFathersSideLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (GrandFatherFathersSideLabel.getCreature() != null) {
-                    setCreature(GrandFatherFathersSideLabel.getCreature());
-                }
-            }
-            
-        });
         VBox GrandFatherFathersSideSection = new VBox(GrandFatherFathersSideLabel);
-        GrandFatherFathersSideSection.setBackground(new Background(new BackgroundFill(Color.rgb(239, 220, 189), new CornerRadii(0), new Insets(0))));
-        GrandFatherFathersSideSection.setBorder(new Border(new BorderStroke(Color.rgb(231, 203, 156), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))));
-        GrandFatherFathersSideSection.prefWidthProperty().bind(familyTreeSection.widthProperty().divide(4));
-        GrandFatherFathersSideSection.setPrefHeight(familyTreeLabelHeight);
-        GrandFatherFathersSideSection.setPadding(new Insets(0, 5, 0, 5));
-        GrandFatherFathersSideSection.setAlignment(Pos.TOP_CENTER);
+        styleFamilyTreeBlock(GrandFatherFathersSideLabel, GrandFatherFathersSideSection, 4, 20);
         familyTreeSection.add(GrandFatherFathersSideSection, 3, 1);
 
         motherLabel = new CreatureLabel(null);
-        motherLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
-        motherLabel.setAlignment(Pos.BOTTOM_CENTER);
-        motherLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (motherLabel.getCreature() != null) {
-                    setCreature(motherLabel.getCreature());
-                }
-            }
-            
-        });
         VBox motherSection = new VBox(motherLabel);
-        motherSection.setBackground(new Background(new BackgroundFill(Color.rgb(239, 220, 189), new CornerRadii(0), new Insets(0))));
-        motherSection.setBorder(new Border(new BorderStroke(Color.rgb(231, 203, 156), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))));
-        motherSection.prefWidthProperty().bind(familyTreeSection.widthProperty().divide(2));
-        motherSection.setPrefHeight(familyTreeLabelHeight);
-        motherSection.setPadding(new Insets(0, 5, 0, 5));
-        motherSection.setAlignment(Pos.TOP_CENTER);
+        styleFamilyTreeBlock(motherLabel, motherSection, 2, 30);
         familyTreeSection.add(motherSection, 0, 2);
         GridPane.setColumnSpan(motherSection, 2);
 
         fatherLabel = new CreatureLabel(null);
-        fatherLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
-        fatherLabel.setAlignment(Pos.BOTTOM_CENTER);
-        fatherLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (fatherLabel.getCreature() != null) {
-                    setCreature(fatherLabel.getCreature());
-                }
-            }
-            
-        });
         VBox fatherSection = new VBox(fatherLabel);
-        fatherSection.setBackground(new Background(new BackgroundFill(Color.rgb(239, 220, 189), new CornerRadii(0), new Insets(0))));
-        fatherSection.setBorder(new Border(new BorderStroke(Color.rgb(231, 203, 156), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))));
-        fatherSection.prefWidthProperty().bind(familyTreeSection.widthProperty().divide(2));
-        fatherSection.setPrefHeight(familyTreeLabelHeight);
-        fatherSection.setPadding(new Insets(0, 5, 0, 5));
-        fatherSection.setAlignment(Pos.TOP_CENTER);
+        styleFamilyTreeBlock(fatherLabel, fatherSection, 2, 30);
         familyTreeSection.add(fatherSection, 2, 2);
         GridPane.setColumnSpan(fatherSection, 2);
 
         selfLabel = new CreatureLabel(null);
-        selfLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 40));
-        selfLabel.setAlignment(Pos.BOTTOM_CENTER);
         VBox selfSection = new VBox(selfLabel);
-        selfSection.setBackground(new Background(new BackgroundFill(Color.rgb(239, 220, 189), new CornerRadii(0), new Insets(0))));
-        selfSection.setBorder(new Border(new BorderStroke(Color.rgb(231, 203, 156), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))));
-        selfSection.prefWidthProperty().bind(familyTreeSection.widthProperty());
-        selfSection.setPrefHeight(familyTreeLabelHeight);
-        selfSection.setPadding(new Insets(0, 5, 0, 5));
-        selfSection.setAlignment(Pos.TOP_CENTER);
+        styleFamilyTreeBlock(selfLabel, selfSection, 1, 40);
         familyTreeSection.add(selfSection, 0, 3);
         GridPane.setColumnSpan(selfSection, 4);
         familyTreeSection.prefHeightProperty().bind(selfSection.heightProperty().add(Bindings.max(fatherSection.heightProperty(), motherSection.heightProperty()).add(Bindings.max(Bindings.max(GrandMotherMothersSideSection.heightProperty(), GrandFatherMothersSideSection.heightProperty()), Bindings.max(GrandMotherFathersSideSection.heightProperty(), GrandFatherFathersSideSection.heightProperty())))).add(familyTreeHeader.heightProperty()));
@@ -385,7 +305,9 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
 
         //children
         childrenListSection = new GridPane();
-        childrenListSection.setStyle("-fx-background-color: #EFDCBD;");
+        childrenListSection.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(Color.rgb(239, 220, 189), null, new Insets(0))))
+                                                                          .otherwise(new Background(new BackgroundFill(Color.rgb(239, 220, 189).grayscale(), null, new Insets(0)))));
+        
         childrenListSection.setAlignment(Pos.TOP_CENTER);
         childrenListSection.minWidthProperty().bind(this.widthProperty().multiply(0.9));
         childrenListSection.setHgap(10);
@@ -406,6 +328,29 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         this.getChildren().add(childrenListSection);
         //height
         this.minHeightProperty().bind(headerSection.heightProperty().add(basicInfoSection.heightProperty().add(relationshipSection.heightProperty().add(pieChartSection.heightProperty().add(typeOverviewSection.heightProperty().add(familyTreeSection.heightProperty().add(childrenListSection.heightProperty())))))).multiply(1.1).add(this.getSpacing()*7));
+    }
+    public void styleFamilyTreeBlock(CreatureLabel cLabel, VBox cSection, int divideBy, int fontSize) {
+        cLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, fontSize));
+        cLabel.setAlignment(Pos.BOTTOM_CENTER);
+        cLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (cLabel.getCreature() != null) {
+                    setCreature(cLabel.getCreature());
+                }
+            }
+            
+        });
+        cSection.backgroundProperty().bind(Bindings.when(cLabel.aliveProperty())
+            .then(new Background(new BackgroundFill(Color.rgb(239, 220, 189), new CornerRadii(0), new Insets(0))))
+            .otherwise(new Background(new BackgroundFill(Color.rgb(239, 220, 189).grayscale(), new CornerRadii(0), new Insets(0)))));
+        cSection.borderProperty().bind(Bindings.when(cLabel.aliveProperty())
+            .then(new Border(new BorderStroke(Color.rgb(231, 203, 156), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))))
+            .otherwise(new Border(new BorderStroke(Color.rgb(231, 203, 156).grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
+        cSection.prefWidthProperty().bind(familyTreeSection.widthProperty().divide(divideBy));
+        cSection.setPrefHeight(familyTreeLabelHeight);
+        cSection.setPadding(new Insets(0, 5, 0, 5));
+        cSection.setAlignment(Pos.TOP_CENTER);
     }
 
     public void updateChildrenList(Creature c) {
@@ -484,10 +429,12 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
                     childrenListSection.add(newFatherLabel, 2, i+1);
                     //lovesymbol
                     HeartShape heart = new HeartShape(symbolSize, Color.RED);
-                    //edge Color.rgb(249, 87, 56)
-                    //fill Color.rgb(248, 112, 96)
-                    heart.getShapeToShow().setFill(Color.rgb(248, 112, 96));
-                    heart.getShapeToShow().setStroke(Color.rgb(249, 87, 56));
+                    heart.getShapeToShow().fillProperty().bind(Bindings.when(alive)
+                        .then(Color.rgb(248, 112, 96))
+                        .otherwise(Color.rgb(248, 112, 96).grayscale()));
+                    heart.getShapeToShow().strokeProperty().bind(Bindings.when(alive)
+                        .then(Color.rgb(249, 87, 56))
+                        .otherwise(Color.rgb(249, 87, 56).grayscale()));
                     heart.getShapeToShow().setStrokeWidth(4);
                     loveLabels.add(heart);
                     childrenListSection.add(heart.getShapeToShow(), 1, i+1);
@@ -495,8 +442,12 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
                     Rectangle base = new Rectangle(-symbolSize, -symbolSize*0.3, symbolSize*0.6, symbolSize*0.6);
                     Polygon point = new Polygon(-symbolSize*0.4, -symbolSize*0.5, -symbolSize*0.4, symbolSize*0.5, 0, 0);
                     Shape arrow = Shape.union(base, point);
-                    arrow.setFill(Color.rgb(85, 221, 224));
-                    arrow.setStroke(Color.rgb(31, 211, 214));
+                    arrow.fillProperty().bind(Bindings.when(alive)
+                        .then(Color.rgb(85, 221, 224))
+                        .otherwise(Color.rgb(85, 221, 224).grayscale()));
+                    arrow.strokeProperty().bind(Bindings.when(alive)
+                        .then(Color.rgb(31, 211, 214))
+                        .otherwise(Color.rgb(31, 211, 214).grayscale()));
                     arrow.setStrokeWidth(4);
                     resultLabels.add(arrow);
                     childrenListSection.add(arrow, 3, i+1);
@@ -582,6 +533,7 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
 
     public void disconnect(Creature c) {
         title.unbind();
+        titleLabel.textFillProperty().unbind();
         titleLabel.setTextFill(Color.BLACK);
         //basic info
         healthInfo.textProperty().unbind();
@@ -590,6 +542,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         energyInfo.setText("Energy: -");
         ageInfo.textProperty().unbind();
         ageInfo.setText("Age: -");
+        alive.unbind();
+        alive.set(true);
         //family tree
         selfLabel.setCreature(null);
         motherLabel.setCreature(null);
@@ -616,16 +570,20 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     public void connect(Creature c) {
         title.bind(c.nameProperty());
         if (c != null) {
-            titleLabel.setTextFill(c.mostProminentType().getColor());
+            //titleLabel.setTextFill(c.mostProminentType().getColor());
+            titleLabel.textFillProperty().bind(Bindings.when(alive)
+                .then(c.mostProminentType().getColor())
+                .otherwise(c.mostProminentType().getColor().desaturate()));
+            //basic info
+            healthInfo.textProperty().bind(Bindings.concat("Health: ", c.healthProperty().asString()));
+            energyInfo.textProperty().bind(Bindings.concat("Energy: ", c.energyProperty().asString()));
+            ageInfo.textProperty().bind(Bindings.concat("Age: ", c.ageProperty().asString()));
+            alive.bind(c.aliveProperty());
+            //type map
+            connectTypeMapTo(c);
+            //visual type map
+            putTypeValues();
         }
-        //basic info
-        healthInfo.textProperty().bind(Bindings.concat("Health: ", c.healthProperty().asString()));
-        energyInfo.textProperty().bind(Bindings.concat("Energy: ", c.energyProperty().asString()));
-        ageInfo.textProperty().bind(Bindings.concat("Age: ", c.ageProperty().asString()));
-        //type map
-        connectTypeMapTo(c);
-        //visual type map
-        putTypeValues();
         //family
         selfLabel.setCreature(c);
         if (c != null) {
@@ -670,13 +628,15 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
 
 class CreatureLabel extends Label{
     Creature creature;
+    SimpleBooleanProperty alive;
     CreatureLabel(Creature c) {
         super();
-        creature = c;
+        alive = new SimpleBooleanProperty(true);
         setCreature(c);
     }
     CreatureLabel(String s, Creature c) {
         super(s);
+        alive = new SimpleBooleanProperty();
         setCreature(c);
     }
     public Creature getCreature() {
@@ -684,13 +644,24 @@ class CreatureLabel extends Label{
     }
     public void setCreature(Creature c) {
         this.textProperty().unbind();
+        this.alive.unbind();
+        this.textFillProperty().unbind();
+        this.alive.set(false);
         creature = c;
         if (c != null) {
-            this.textProperty().bind(c.nameProperty());
-            this.setTextFill(c.mostProminentType().getColor());
+            this.textProperty().bind(c.nameProperty().concat(Bindings.when(alive).then("").otherwise("☠")));
+            this.textFillProperty().bind(Bindings.when(alive).then(c.mostProminentType().getColor()).otherwise(c.mostProminentType().getColor().desaturate()));
+            alive.bind(c.aliveProperty());
         } else {
             this.setText("-");
             this.setTextFill(Color.BLACK);
         }
+    }
+    public SimpleBooleanProperty aliveProperty() {
+        return alive;
+    }
+
+    public boolean getAlive() {
+        return alive.get();
     }
 }

@@ -7,8 +7,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -53,21 +51,25 @@ public class Main extends Application{
                     typeStats.setPadding(new Insets(5, 30, 5, 20));
                     typeStats.setPrefWidth(550);
 
-                scroller.setContent(typeStats);
-
                     Pane creatureOverview = new Pane();
                     creatureOverview.setStyle("-fx-background-color: #EAD2AC;");
                     creatureOverview.setPadding(new Insets(5, 30, 5, 20));
                     creatureOverview.setPrefWidth(550);
 
-                scroller.setContent(creatureOverview);
-
                     CreatureStats creatureStats = new CreatureStats(encoder);
-                    creatureStats.setStyle("-fx-background-color: #EAD2AC;");
                     creatureStats.setPadding(new Insets(5, 30, 5, 20));
                     creatureStats.setPrefWidth(550);
 
-                scroller.setContent(creatureStats);
+                    Pane breedingSettings = new Pane();
+                    breedingSettings.setStyle("-fx-background-color: #EAD2AC;");
+                    breedingSettings.setPadding(new Insets(5, 30, 5, 20));
+                    breedingSettings.setPrefWidth(550);
+
+                    Pane fightingSettings = new Pane();
+                    fightingSettings.setStyle("-fx-background-color: #EAD2AC;");
+                    fightingSettings.setPadding(new Insets(5, 30, 5, 20));
+                    fightingSettings.setPrefWidth(550);
+
                 scroller.setContent(typeStats);
             infoscreens.getChildren().add(scroller);
                 
@@ -75,9 +77,9 @@ public class Main extends Application{
         wholeScreen.setRight(infoscreens);
         
         //setup swappers
-        ScreenManager screenSwapper = new ScreenManager(scroller, switchPane, 3, 
-                                                        new Pane[]{typeStats, creatureOverview, creatureStats}, 
-                                                        new String[]{"types", "creatures", "unnamed"});
+        ScreenManager screenSwapper = new ScreenManager(scroller, switchPane, 5, 
+                                                        new Pane[]{typeStats, creatureOverview, creatureStats, breedingSettings, fightingSettings}, 
+                                                        new String[]{"types", "creatures", "unnamed", "breeding", "fighting"});
         Scene scene = new Scene(wholeScreen);
 
         //setup connections
@@ -92,6 +94,8 @@ public class Main extends Application{
         primaryStage.setTitle("pokemon evolution");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+
         for (int x=0; x<45; x++) {
             if (x%3 == 2) {
                 mainLogic.addCreature(Relationship.breed(mainLogic, 50+(x/3)*30, 100, mainLogic.getCreature(x-2), mainLogic.getCreature(x-1), 0, encoder));
@@ -117,12 +121,6 @@ public class Main extends Application{
         for (int x=0; x<15; x++) {
             mainLogic.addCreature(Relationship.breed(mainLogic, 50+x*30, 200, mainLogic.getCreature(x*3+2), mainLogic.getCreature(45+x*3+2), 0, encoder));
         }
-
-        int c1 = 1;
-        int c2 = 3;
-        HeartShape heart = new HeartShape(mainLogic.getCreature(c1).getX(), mainLogic.getCreature(c1).getY(), 
-                                          mainLogic.getCreature(c2).getX(), mainLogic.getCreature(c2).getY(), Color.RED);
-        world.getChildren().add(heart.getShapeToShow());
-        heart.getShapeToShow().setViewOrder(5);
+        mainLogic.getCreature(0).setAlive(false);
     }
 }

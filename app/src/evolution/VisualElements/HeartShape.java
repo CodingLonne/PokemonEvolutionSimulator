@@ -1,4 +1,4 @@
-package evolution;
+package evolution.VisualElements;
 
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
@@ -20,7 +20,7 @@ public class HeartShape {
     private double downStepX;
     private double downStepY;
 
-    HeartShape(double leftX, double leftY, double rightX, double rightY, Paint fill) {
+    public HeartShape(double leftX, double leftY, double rightX, double rightY, Paint fill) {
         distancePoints = Math.sqrt(Math.pow(leftX-rightX, 2)+Math.pow(leftY-rightY, 2));
         width = distancePoints*(1+Math.sqrt(2));
         middleX = (leftX+rightX)/2;
@@ -43,15 +43,15 @@ public class HeartShape {
         heart.setFill(fill);
     }
 
-    HeartShape(double middleX, double middleY, double width, Paint fill) {
+    public HeartShape(double middleX, double middleY, double width, Paint fill) {
         this(middleX-(width/(1+Math.sqrt(2)))/2, middleY, middleX+(width/(1+Math.sqrt(2)))/2, middleY, fill);
     }
 
-    HeartShape(double width, Paint fill) {
+    public HeartShape(double width, Paint fill) {
         this(-(width/(1+Math.sqrt(2)))/2, 0, (width/(1+Math.sqrt(2)))/2, 0, fill);
     }
 
-    HeartShape(double width) {
+    public HeartShape(double width) {
         this(-(width/(1+Math.sqrt(2)))/2, 0, (width/(1+Math.sqrt(2)))/2, 0, null);
     }
 

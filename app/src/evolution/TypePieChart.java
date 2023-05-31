@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.NumberBinding;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -24,18 +25,23 @@ import javafx.scene.text.TextAlignment;
 
 
 public class TypePieChart extends Pane{
-    HashMap<Type, SimpleIntegerProperty> data;
-    LinkedList<Arc> piePieces;
-    Label label;
-    Circle noDataCicle;
-    String noDataErrorMessage;
-    Label noDataLabel;
-    SimpleStringProperty name;
-    SimpleIntegerProperty total;
+    private HashMap<Type, SimpleIntegerProperty> data;
+    private LinkedList<Arc> piePieces;
+    private Label label;
+    private Circle noDataCicle;
+    private String noDataErrorMessage;
+    private Label noDataLabel;
+    private SimpleStringProperty name;
+    private SimpleIntegerProperty total;
+    private SimpleBooleanProperty desaturated;
+    private SimpleBooleanProperty grayscale;
     private HashMap<Type, SimpleDoubleProperty> fractions;
     TypePieChart(HashMap<Type, SimpleIntegerProperty> data, DoubleBinding width, String name, String noDataErrorMessage) {
         this.prefWidthProperty().bind(width);
         this.minHeightProperty().bind(width.add(30));
+        desaturated = new SimpleBooleanProperty(false);
+        grayscale = new SimpleBooleanProperty(false);
+
         this.data = data;
         this.fractions = new HashMap<Type, SimpleDoubleProperty>();
         this.total = new SimpleIntegerProperty();
@@ -81,7 +87,13 @@ public class TypePieChart extends Pane{
         newArc.lengthProperty().bind(fractions.get(t).multiply(360));
         newArc.startAngleProperty().bind(addD(Arrays.copyOfRange(Type.allTypes(), 0, Arrays.asList(Type.allTypes()).indexOf(t)), fractions).multiply(360));
 
-        newArc.setFill(t.getColor());
+        newArc.fillProperty().bind(Bindings.when(desaturated)
+            .then(Bindings.when(grayscale)
+                .then(t.getColor().desaturate().grayscale())
+                .otherwise(t.getColor().desaturate()))
+            .otherwise(Bindings.when(grayscale)
+                .then(t.getColor().grayscale())
+                .otherwise(t.getColor())));
         newArc.setType(ArcType.ROUND);
         return newArc;
     }
@@ -125,7 +137,34 @@ public class TypePieChart extends Pane{
         title.translateYProperty().bind(this.widthProperty().subtract(title.heightProperty().divide(2)));
         title.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
     }
-    public SimpleDoubleProperty getFraction(Type t) {
+
+    public boolean getDesaturated() {
+        return desaturated.get();
+    }
+
+    public boolean getGrayScale() {
+        return grayscale.get();
+    }
+
+    public void setDesaturated(boolean b) {
+        desaturated.set(b);
+    }
+
+    public void setGrayScale(boolean b) {
+        grayscale.set(b);
+    }
+
+    public SimpleBooleanProperty desaturatedProperty() {
+        return desaturated;
+    }
+
+    public SimpleBooleanProperty grayScaleProperty() {
+        return grayscale;
+    }
+ 
+    public SimpleDoubleProperty fractionProperty(Type t) {
         return fractions.get(t);
     }
+
+    
 }

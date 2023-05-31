@@ -1,13 +1,14 @@
 package evolution;
 
 import java.util.HashMap;
+
+import evolution.VisualElements.CreatureBody;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
 public class VisualWorld extends Pane implements World.CreatureListener, World.WorldListener{
@@ -74,29 +75,3 @@ public class VisualWorld extends Pane implements World.CreatureListener, World.W
     }
 }
 
-class CreatureBody extends Circle {
-    private Creature host;
-    CreatureBody(Creature host) {
-        super();
-        this.host = host;
-    }
-    CreatureBody(Creature host, double radius) {
-        super(radius);
-        this.host = host;
-    }
-    CreatureBody(Creature host, double centerX, double centerY, double radius) {
-        super(centerX, centerY, radius);
-        this.host = host;
-    }
-    CreatureBody(Creature host, double centerX, double centerY, double radius, Paint fill) {
-        super(centerX, centerY, radius, fill);
-        this.host = host;
-    }
-    CreatureBody(Creature host, double radius, Paint fill) {
-        super(radius, fill);
-        this.host = host;
-    }
-    public Creature getHost() {
-        return host;
-    }
-}
