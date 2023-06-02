@@ -22,6 +22,7 @@ public class Creature implements proteinChangeListener{
     private SimpleDoubleProperty energy;
     private SimpleIntegerProperty age;
     private SimpleBooleanProperty alive;
+    private SimpleBooleanProperty isSleeping;
     private double horniness;
     private SimpleDoubleProperty xProperty;
     private SimpleDoubleProperty yProperty;
@@ -46,6 +47,7 @@ public class Creature implements proteinChangeListener{
         this.energy = new SimpleDoubleProperty(energy);
         this.alive = new SimpleBooleanProperty(true);
         this.horniness = 0d;
+        this.isSleeping = new SimpleBooleanProperty(false);
 
         proteinDefense = dna.getDefenseMap();
         proteinOffense = dna.getOffenseMap();
@@ -118,6 +120,10 @@ public class Creature implements proteinChangeListener{
         return alive.get();
     }
 
+    public boolean getSleeping() {
+        return isSleeping.get();
+    }
+
     public HashMap<Type, Integer> getDefenseMap() {
         return proteinDefense;
     }
@@ -175,6 +181,10 @@ public class Creature implements proteinChangeListener{
         alive.set(b);
     }
 
+    public void setSleeping(boolean b) {
+        isSleeping.set(b);
+    }
+
     public void setParents(Creature m, Creature f) {
         mother = m;
         father = f;
@@ -221,6 +231,11 @@ public class Creature implements proteinChangeListener{
     public SimpleBooleanProperty aliveProperty() {
         return alive;
     }
+
+    public SimpleBooleanProperty sleepingProperty() {
+        return isSleeping;
+    }
+
     //listeners
     public void addCreatureClickListener(CreatureClickListener listener) {
         creatureClickListeners.add(listener);

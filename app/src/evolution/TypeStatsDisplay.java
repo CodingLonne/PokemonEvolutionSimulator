@@ -3,6 +3,7 @@ package evolution;
 import java.util.Arrays;
 import java.util.HashMap;
 import evolution.ScreenManager.screenManagerOwned;
+import evolution.VisualElements.TypeCodeDisplay;
 import evolution.World.CreatureListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.binding.Bindings;
@@ -15,7 +16,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -34,60 +34,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
-class TypeCodeDisplay extends HBox{
-    public class BinarySquare extends Rectangle{
-        SimpleBooleanProperty myBit;
-        SimpleBooleanProperty valid;
-        BinarySquare(SimpleBooleanProperty bit, SimpleBooleanProperty isValidGene, double squareSize) {
-            super(squareSize, squareSize);
-            myBit = new SimpleBooleanProperty();
-            myBit.bindBidirectional(bit);
-            valid = new SimpleBooleanProperty();
-            valid.bind(isValidGene);
-            this.fillProperty().bind(Bindings.when(valid).
-                                    then(Bindings.when(myBit).then(Color.WHITE).otherwise(Color.BLACK)).
-                                    otherwise(Bindings.when(myBit).
-                                        then(Color.rgb(255, 220, 220)).
-                                        otherwise(Color.rgb(128, 0, 32))));
-        }
-        public SimpleBooleanProperty getBit() {
-            return myBit;
-        }
-        public void switchBit() {
-            if (myBit.getValue()) {
-                myBit.set(false);
-            } else {
-                myBit.set(true);
-            }
-        }
-    }
-    BinarySquare[] bitCode;
-    SimpleBooleanProperty valid;
-    TypeCodeDisplay(SimpleBooleanProperty[] codes, SimpleBooleanProperty isValidGene, double squareSize, TypeStatsDisplay listener) {
-        super();
-        this.setPadding(new Insets(4, 5, 4, 5));
-        //D7A85B=dirty yellow, 26CCCF=light blue, E75A0D=orange
-        this.setStyle("-fx-background-color: #D7A85B;");
-        valid = new SimpleBooleanProperty();
-        valid.bind(isValidGene);
-        bitCode = new BinarySquare[codes.length];
-        for (int i=0; i<codes.length; i++) {
-            bitCode[i] = new BinarySquare(codes[i], valid, squareSize);
-            bitCode[i].setOnMouseClicked(new EventHandler<Event>() {
-                @Override
-                public void handle(Event event) {
-                    ((BinarySquare) event.getTarget()).switchBit();
-                    listener.adjustGeneShortcutText();
-                }
-            });
-            this.getChildren().add(bitCode[i]);
-        }
-    }
-}
 
 
 public class TypeStatsDisplay extends VBox implements screenManagerOwned, CreatureListener, proteinChangeListener{
@@ -120,7 +69,7 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
         this.world = world;
         this.encodingManager = encodingManager;
         encodingManager.addListener(this);
-        title = new SimpleStringProperty("types");
+        title = new SimpleStringProperty("genes");
         //piechart section
         typeDefenseData = setUpTypePiechartData();
         typeOffenseData = setUpTypePiechartData();
@@ -286,7 +235,6 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
             o1.setAlignment(Pos.CENTER);
             o1.setPadding(new Insets(0, 5, 0, 5));
             //link up
-            //d1.visibleProperty().bind(piechartDefense.getFraction(currentType).isNotEqualTo(0));
             d1.textProperty().bind(
                 Bindings.when(piechartDefense.fractionProperty(currentType).isEqualTo(0)).
                 then("-").
@@ -294,7 +242,6 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
                             () -> (double) Math.round(piechartDefense.fractionProperty(currentType).doubleValue()*1000)/10, 
                             piechartDefense.fractionProperty(currentType))
                         .asString().concat("%")));
-            //o1.visibleProperty().bind(piechartOffense.getFraction(currentType).isNotEqualTo(0));
             o1.textProperty().bind(
                 Bindings.when(piechartOffense.fractionProperty(currentType).isEqualTo(0)).
                 then("-").
@@ -329,6 +276,7 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
         }
         shortcutTextArea.textProperty().setValue(result);
     }
+
     public void adjustGenesDisplay() {
         newSettingsSaved.set(false);
         String setting = shortcutTextArea.getText();
@@ -352,6 +300,7 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
         }
         return newHashMap;
     }
+
     public BooleanBinding existsInvalid(SimpleBooleanProperty[] bees) {
         SimpleBooleanProperty notTrue = new SimpleBooleanProperty(false);
         BooleanBinding result = notTrue.or(notTrue);

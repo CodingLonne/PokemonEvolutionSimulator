@@ -51,9 +51,7 @@ public class Main extends Application{
                     typeStats.setPadding(new Insets(5, 30, 5, 20));
                     typeStats.setPrefWidth(550);
 
-                    Pane creatureOverview = new Pane();
-                    creatureOverview.setStyle("-fx-background-color: #EAD2AC;");
-                    creatureOverview.setPadding(new Insets(5, 30, 5, 20));
+                    CreaturesDisplay creatureOverview = new CreaturesDisplay();
                     creatureOverview.setPrefWidth(550);
 
                     CreatureStats creatureStats = new CreatureStats(encoder);
@@ -85,6 +83,7 @@ public class Main extends Application{
         //setup connections
         mainLogic.addCreatureListener(world);
         mainLogic.addCreatureListener(typeStats);
+        mainLogic.addCreatureListener(creatureOverview);
         mainLogic.addWorldListener(world);
         mainLogic.addCreatureListener(nameGranter);
         mainLogic.addCreatureClickListener(creatureStats);
@@ -105,6 +104,7 @@ public class Main extends Application{
                 mainLogic.addCreature(50+(x/3)*30, 150);
                 mainLogic.getCreature(x).addLove(mainLogic.getCreature(x-1));
                 mainLogic.getCreature(x-1).addLove(mainLogic.getCreature(x));
+                mainLogic.getCreature(x).setAge(10);
             }
         }
         for (int x=0; x<45; x++) {
@@ -122,5 +122,9 @@ public class Main extends Application{
             mainLogic.addCreature(Relationship.breed(mainLogic, 50+x*30, 200, mainLogic.getCreature(x*3+2), mainLogic.getCreature(45+x*3+2), 0, encoder));
         }
         mainLogic.getCreature(0).setAlive(false);
+        for (int x=2; x<105; x+= 5) {
+            mainLogic.getCreature(x).setSleeping(true);
+            mainLogic.getCreature(x).setAge(50);
+        }
     }
 }
