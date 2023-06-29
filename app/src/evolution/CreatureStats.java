@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import evolution.ScreenManager.screenManagerOwned;
 import evolution.VisualElements.HeartShape;
 import evolution.VisualElements.MyColors;
+import evolution.VisualElements.TypePieChart;
 import evolution.World.CreatureClickListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.binding.Bindings;

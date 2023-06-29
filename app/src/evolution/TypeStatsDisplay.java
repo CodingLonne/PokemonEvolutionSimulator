@@ -5,6 +5,7 @@ import java.util.HashMap;
 import evolution.ScreenManager.screenManagerOwned;
 import evolution.VisualElements.MyColors;
 import evolution.VisualElements.TypeCodeDisplay;
+import evolution.VisualElements.TypePieChart;
 import evolution.World.CreatureListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.binding.Bindings;
