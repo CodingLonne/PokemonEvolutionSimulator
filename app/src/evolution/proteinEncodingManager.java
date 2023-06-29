@@ -6,7 +6,7 @@ import java.util.Map;
 
 import javafx.beans.property.SimpleDoubleProperty;
 
-class proteinEncodingManager {
+public class proteinEncodingManager {
     interface proteinChangeListener{
         public void onProteinChange();
         public void onProteinChangeFinished();

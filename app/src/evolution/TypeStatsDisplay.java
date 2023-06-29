@@ -3,6 +3,7 @@ package evolution;
 import java.util.Arrays;
 import java.util.HashMap;
 import evolution.ScreenManager.screenManagerOwned;
+import evolution.VisualElements.MyColors;
 import evolution.VisualElements.TypeCodeDisplay;
 import evolution.World.CreatureListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
@@ -82,8 +83,8 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
         shortcutLabel.setTextFill(Color.BLACK);
         shortcutLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
         shortcutTextArea = new TextField(encodingManager.getSetting());
-        shortcutTextArea.setBackground(new Background(new BackgroundFill(Color.rgb(159, 229, 162), new CornerRadii(12), shortcutTextArea.getInsets())));
-        shortcutTextArea.setBorder(new Border(new BorderStroke(Color.rgb(44, 160, 50), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+        shortcutTextArea.setBackground(new Background(new BackgroundFill(MyColors.celadon, new CornerRadii(12), shortcutTextArea.getInsets())));
+        shortcutTextArea.setBorder(new Border(new BorderStroke(MyColors.pigmentGreen, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
         shortcutTextArea.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
         shortcutTextArea.textProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -146,8 +147,8 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
         geneSafeButton.setPrefHeight(30);
         //appearance
         geneSafeButton.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 15));
-        geneSafeButton.setBackground(new Background(new BackgroundFill(Color.rgb(85, 221, 224), new CornerRadii(12), geneSafeButton.getInsets())));
-        geneSafeButton.setBorder(new Border(new BorderStroke(Color.rgb(47, 84, 117), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+        geneSafeButton.setBackground(new Background(new BackgroundFill(MyColors.robinEggBlue, new CornerRadii(12), geneSafeButton.getInsets())));
+        geneSafeButton.setBorder(new Border(new BorderStroke(MyColors.ylnMnBlue, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
         //action
         geneSafeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override

@@ -3,7 +3,9 @@ package evolution;
 import java.util.HashMap;
 
 import evolution.VisualElements.CreatureBody;
+import evolution.VisualElements.MyColors;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -12,9 +14,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 public class VisualWorld extends Pane implements World.CreatureListener, World.WorldListener{
-    private SimpleIntegerProperty centerX;
-    private SimpleIntegerProperty centerY;
-    private SimpleIntegerProperty radius;
+    private SimpleDoubleProperty centerX;
+    private SimpleDoubleProperty centerY;
+    private SimpleDoubleProperty radius;
+    private SimpleDoubleProperty scale;
     private HashMap<Creature, CreatureBody> creatureBodies;
     private SimpleIntegerProperty day;
 
@@ -26,31 +29,35 @@ public class VisualWorld extends Pane implements World.CreatureListener, World.W
     VisualWorld(int size) {
         this.setPrefWidth(size);
         this.setPrefHeight(size);
-        centerX = new SimpleIntegerProperty();
-        centerY = new SimpleIntegerProperty();
+        centerX = new SimpleDoubleProperty();
+        centerY = new SimpleDoubleProperty();
         centerX.bind(widthProperty().divide(2));
         centerY.bind(heightProperty().divide(2));
+        scale = new SimpleDoubleProperty(1);
         Circle field = new Circle();
         field.centerXProperty().bind(centerX);
         field.centerYProperty().bind(centerY);
-        radius = new SimpleIntegerProperty();
+        radius = new SimpleDoubleProperty();
         radius.bind(Bindings.min(this.widthProperty(), this.heightProperty()).divide(2));
         field.radiusProperty().bind(radius);
-        field.setFill(Color.rgb(159, 229, 162));
+        field.setFill(MyColors.celadon);
         field.setViewOrder(backgroundFieldLayer);
         this.getChildren().add(field);
         creatureBodies = new HashMap<Creature, CreatureBody>();
         this.day = new SimpleIntegerProperty(0);
     }
-    public void setupNeededConnections(SimpleIntegerProperty day) {
+    public void setupNeededConnections(SimpleIntegerProperty day, SimpleDoubleProperty worldSize) {
         this.day.bind(day);
+        scale.bind(radius.divide(worldSize));
     }
     @Override
     public void onCreatureCreate(Creature c) {
         CreatureBody body = new CreatureBody(c, c.getX(), c.getY(), 10, c.mostProminentType().getColor());
         body.setStroke(Color.BLACK);
-        body.centerXProperty().bind(c.getXProperty());
-        body.centerYProperty().bind(c.getYProperty());
+        //c.getXProperty()
+        body.centerXProperty().bind(centerX.add(c.xProperty().multiply(scale)));
+        body.centerYProperty().bind(centerY.add(c.yProperty().multiply(scale)));
+        body.radiusProperty().bind(c.sizeProperty().multiply(scale));
         body.setOnMouseClicked(new EventHandler<Event>() {
 
             @Override

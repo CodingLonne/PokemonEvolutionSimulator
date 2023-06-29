@@ -6,26 +6,37 @@ import java.util.LinkedList;
 import evolution.Relationship.Relation;
 import evolution.World.CreatureClickListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 public class Creature implements proteinChangeListener{
+    private final static double defaultSize = 16;
+    private final static double defaultSpeed = 2;
+    private final static double defaultSense = 100;
+
     private Dna dna;
     private World world;
 
     private SimpleStringProperty name;
     private Creature mother;
     private Creature father;
+
     private SimpleDoubleProperty health;
     private SimpleDoubleProperty energy;
     private SimpleIntegerProperty age;
+
     private SimpleBooleanProperty alive;
     private SimpleBooleanProperty isSleeping;
     private double horniness;
+
     private SimpleDoubleProperty xProperty;
     private SimpleDoubleProperty yProperty;
+    private SimpleDoubleProperty size = new SimpleDoubleProperty(defaultSize);
+    private SimpleDoubleProperty speed = new SimpleDoubleProperty(defaultSpeed);
+    private SimpleDoubleProperty sense = new SimpleDoubleProperty(defaultSense);
 
     private LinkedList<Creature> loves;
     private LinkedList<Creature> enemies;
@@ -104,6 +115,18 @@ public class Creature implements proteinChangeListener{
         return yProperty.getValue();
     }
 
+    public double getSize() {
+        return size.get();
+    }
+
+    public double getSpeed() {
+        return speed.get();
+    }
+
+    public double getSense() {
+        return sense.get();
+    }
+
     public double getHealth() {
         return health.get();
     }
@@ -165,6 +188,18 @@ public class Creature implements proteinChangeListener{
         yProperty.setValue(y);
     }
 
+    public void setSize(double s) {
+        size.set(s);
+    }
+
+    public void setSpeed(double s) {
+        speed.set(s);
+    }
+
+    public void setSense(double s) {
+        sense.set(s);
+    }
+
     public void setHealth(double h) {
         health.set(h);
     }
@@ -208,12 +243,24 @@ public class Creature implements proteinChangeListener{
         return name;
     }
 
-    public SimpleDoubleProperty getXProperty() {
+    public SimpleDoubleProperty xProperty() {
         return xProperty;
     }
 
-    public SimpleDoubleProperty getYProperty() {
+    public SimpleDoubleProperty yProperty() {
         return yProperty;
+    }
+
+    public DoubleProperty sizeProperty() {
+        return size;
+    }
+
+    public DoubleProperty speedProperty() {
+        return speed;
+    }
+
+    public DoubleProperty senseProperty() {
+        return sense;
     }
 
     public SimpleDoubleProperty healthProperty() {

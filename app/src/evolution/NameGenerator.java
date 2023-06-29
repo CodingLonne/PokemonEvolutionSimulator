@@ -38,6 +38,8 @@ public class NameGenerator implements CreatureListener{
     public int determineIndex(int bottom, int top, String dnaString, int dnaIndex) {
         if (top-bottom<=1) {
             return bottom;
+        } else if (dnaIndex<0 || dnaIndex>=dnaString.length()){
+            return (bottom+top)/2;
         } else {
             if (dnaString.charAt(dnaIndex) == '1') { //look at bottom half of list
                 return determineIndex(bottom+(top-bottom)/2, top, dnaString, dnaIndex+1);
@@ -51,7 +53,7 @@ public class NameGenerator implements CreatureListener{
     public void onCreatureCreate(Creature c) {
         if (giveNames) {
             if (availableNames.size()>0) {
-                int index = determineIndex(0, availableNames.size(), c.getDna().getDna(), 0);
+                int index = determineIndex(0, availableNames.size(), c.getDna().getRandomChromosome().getDna(), 0);
                 String name = availableNames.get(index);
                 availableNames.remove(index);
                 c.giveName(name);

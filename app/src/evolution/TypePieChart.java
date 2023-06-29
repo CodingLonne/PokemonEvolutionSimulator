@@ -65,10 +65,10 @@ public class TypePieChart extends Pane{
         this.noDataErrorMessage = noDataErrorMessage;
         installNoDataNotif(noDataCicle, noDataLabel);
         this.getChildren().addAll(noDataCicle, noDataLabel);
-        this.label = new Label(name);
+        this.name = new SimpleStringProperty(name);
+        this.label = new Label();
         styleTitle(label);
         this.getChildren().add(label);
-        this.name = new SimpleStringProperty(name);
     }
     void addFraction(HashMap<Type, SimpleDoubleProperty> map, Type t) {
         fractions.put(t, new SimpleDoubleProperty());
@@ -134,7 +134,8 @@ public class TypePieChart extends Pane{
     }
     public void styleTitle(Label title) {
         title.translateXProperty().bind(this.widthProperty().divide(2).subtract(title.widthProperty().divide(2)));
-        title.translateYProperty().bind(this.widthProperty().subtract(title.heightProperty().divide(2)));
+        title.translateYProperty().bind(this.widthProperty());
+        title.textProperty().bind(name);
         title.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
     }
 
@@ -166,5 +167,11 @@ public class TypePieChart extends Pane{
         return fractions.get(t);
     }
 
-    
+    public Font getErrorFont() {
+        return noDataLabel.getFont();
+    }
+
+    public void setErrorFont(Font f) {
+        noDataLabel.setFont(f);
+    }
 }

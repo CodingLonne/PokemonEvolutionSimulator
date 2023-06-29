@@ -1,5 +1,6 @@
 package evolution;
 
+import evolution.VisualElements.MyColors;
 import evolution.World.CreatureClickListener;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,7 +18,6 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 
 
 public class ScreenManager implements CreatureClickListener{
@@ -79,8 +79,8 @@ public class ScreenManager implements CreatureClickListener{
             buttons[i].prefHeightProperty().bind(switchPane.heightProperty().divide(options));
             buttons[i].prefWidthProperty().bind(switchPane.widthProperty().divide(options));
             //appearance
-            buttons[i].setBackground(new Background(new BackgroundFill(Color.rgb(85, 221, 224), new CornerRadii(12), buttons[i].getInsets())));
-            buttons[i].setBorder(new Border(new BorderStroke(Color.rgb(47, 84, 117), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+            buttons[i].setBackground(new Background(new BackgroundFill(MyColors.robinEggBlue, new CornerRadii(12), buttons[i].getInsets())));
+            buttons[i].setBorder(new Border(new BorderStroke(MyColors.ylnMnBlue, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
             //action
             buttons[i].setOnAction(new EventHandler<ActionEvent>() {
                 @Override
@@ -105,9 +105,9 @@ public class ScreenManager implements CreatureClickListener{
     private void setButtonHighlight(int page) {
         for (int i = 0; i<options; i++) {
             if (page==i) {
-                buttons[i].setBorder(new Border(new BorderStroke(Color.rgb(6, 11, 15), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(4))));
+                buttons[i].setBorder(new Border(new BorderStroke(MyColors.richBlack, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(4))));
             } else {
-                buttons[i].setBorder(new Border(new BorderStroke(Color.rgb(47, 84, 117), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(4))));
+                buttons[i].setBorder(new Border(new BorderStroke(MyColors.ylnMnBlue, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(4))));
             }
         }
     }

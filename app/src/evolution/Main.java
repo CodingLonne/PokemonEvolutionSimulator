@@ -3,11 +3,14 @@ package evolution;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import evolution.VisualElements.MyColors;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -30,12 +33,12 @@ public class Main extends Application{
         wholeScreen.setCenter(world);
 
             VBox infoscreens = new VBox();
-            infoscreens.setStyle("-fx-background-color: #F3E5CE;");
+            infoscreens.setBackground(new Background(new BackgroundFill(MyColors.champagne, null, null)));
             infoscreens.setPrefSize(550, 600);
                 
                 HBox switchPane = new HBox();
                 switchPane.setAlignment(Pos.CENTER);
-                switchPane.setStyle("-fx-background-color: #D39F4A;");
+                switchPane.setBackground(new Background(new BackgroundFill(MyColors.earthYellow, null, null)));
                 switchPane.setPadding(new Insets(5, 30, 5, 20));
                 switchPane.setPrefSize(550, 70);
             infoscreens.getChildren().add(switchPane);
@@ -47,7 +50,7 @@ public class Main extends Application{
                 scroller.prefViewportHeightProperty().bind(infoscreens.heightProperty().subtract(switchPane.heightProperty()));
 
                     TypeStatsDisplay typeStats = new TypeStatsDisplay(encoder, mainLogic);
-                    typeStats.setStyle("-fx-background-color: #EAD2AC;");
+                    typeStats.setBackground(new Background(new BackgroundFill(MyColors.wheat, null, null)));
                     typeStats.setPadding(new Insets(5, 30, 5, 20));
                     typeStats.setPrefWidth(550);
 
@@ -59,12 +62,12 @@ public class Main extends Application{
                     creatureStats.setPrefWidth(550);
 
                     Pane breedingSettings = new Pane();
-                    breedingSettings.setStyle("-fx-background-color: #EAD2AC;");
+                    breedingSettings.setBackground(new Background(new BackgroundFill(MyColors.wheat, null, null)));
                     breedingSettings.setPadding(new Insets(5, 30, 5, 20));
                     breedingSettings.setPrefWidth(550);
 
                     Pane fightingSettings = new Pane();
-                    fightingSettings.setStyle("-fx-background-color: #EAD2AC;");
+                    fightingSettings.setBackground(new Background(new BackgroundFill(MyColors.wheat, null, null)));
                     fightingSettings.setPadding(new Insets(5, 30, 5, 20));
                     fightingSettings.setPrefWidth(550);
 
@@ -88,6 +91,10 @@ public class Main extends Application{
         mainLogic.addCreatureListener(nameGranter);
         mainLogic.addCreatureClickListener(creatureStats);
         mainLogic.addCreatureClickListener(screenSwapper);
+        creatureOverview.addCreatureBiome(mainLogic);
+
+        //initialize stuff when needed
+        mainLogic.initialize();
 
         //lset all online
         primaryStage.setTitle("pokemon evolution");
@@ -95,6 +102,29 @@ public class Main extends Application{
         primaryStage.show();
 
 
+        /* 
+        int mutations = 3;
+        double crossingOver = 0.1;
+        for (int x5=0; x5<32; x5++) {
+            mainLogic.addCreature(-512+32*x5, -250);
+        }
+        for (int x4=0; x4<16; x4++) { //-512+64*x4, -210
+            mainLogic.addCreature(Relationship.breed(mainLogic, -512+64*x4, -210, mainLogic.getCreature(x4*2), mainLogic.getCreature(x4*2+1), mutations, crossingOver, encoder));
+        }
+        for (int x3=0; x3<8; x3++) { //-512+64*x4, -210
+            mainLogic.addCreature(Relationship.breed(mainLogic, -512+128*x3, -170, mainLogic.getCreature(32+x3*2), mainLogic.getCreature(32+x3*2+1), mutations, crossingOver, encoder));
+        }
+        for (int x2=0; x2<4; x2++) { //-512+64*x4, -210
+            mainLogic.addCreature(Relationship.breed(mainLogic, -512+256*x2, -130, mainLogic.getCreature(48+x2*2), mainLogic.getCreature(48+x2*2+1), mutations, crossingOver, encoder));
+        }
+        for (int x1=0; x1<2; x1++) { //-512+64*x4, -210
+            mainLogic.addCreature(Relationship.breed(mainLogic, -512+512*x1, -90, mainLogic.getCreature(56+x1*2), mainLogic.getCreature(56+x1*2+1), mutations, crossingOver, encoder));
+        }
+        for (int x0=0; x0<1; x0++) { //-512+64*x4, -210
+            mainLogic.addCreature(Relationship.breed(mainLogic, -512+1024*x0, -50, mainLogic.getCreature(60+x0*2), mainLogic.getCreature(60+x0*2+1), mutations, crossingOver, encoder));
+        }
+        */
+        /*
         for (int x=0; x<45; x++) {
             if (x%3 == 2) {
                 mainLogic.addCreature(Relationship.breed(mainLogic, 50+(x/3)*30, 100, mainLogic.getCreature(x-2), mainLogic.getCreature(x-1), 0, encoder));
@@ -126,5 +156,6 @@ public class Main extends Application{
             mainLogic.getCreature(x).setSleeping(true);
             mainLogic.getCreature(x).setAge(50);
         }
+        */
     }
 }

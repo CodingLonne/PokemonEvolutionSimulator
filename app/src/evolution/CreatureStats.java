@@ -7,6 +7,7 @@ import java.util.LinkedList;
 
 import evolution.ScreenManager.screenManagerOwned;
 import evolution.VisualElements.HeartShape;
+import evolution.VisualElements.MyColors;
 import evolution.World.CreatureClickListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.binding.Bindings;
@@ -100,15 +101,16 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         //graphics
         this.setPadding(new Insets(4, 5, 4, 5));
         this.setSpacing(30);
-        this.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(Color.rgb(234, 210, 172), null, new Insets(0)))).otherwise(new Background(new BackgroundFill(Color.rgb(234, 210, 172).grayscale(), null, new Insets(0)))));
+        this.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(MyColors.wheat, null, new Insets(0)))).otherwise(new Background(new BackgroundFill(MyColors.wheat.grayscale(), null, new Insets(0)))));
         this.styleProperty().bind(Bindings.when(alive).then("-fx-background-color: #EAD2AC;").otherwise(""));
         this.setAlignment(Pos.TOP_CENTER);
         //header
         headerSection = new HBox();
-        headerSection.setPadding(new Insets(0, 10, 5, 10));
+        headerSection.setPadding(new Insets(0, 10, 0, 10));
         titleLabel = new Label();
         titleLabel.textProperty().bind(Bindings.when(creatureSelected).then(title).otherwise("-"));
         titleLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 40));
+        titleLabel.setUnderline(true);
         headerSection.getChildren().add(titleLabel);
         headerSection.setPrefHeight(headerHeight);
         this.getChildren().add(headerSection);
@@ -124,8 +126,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         this.getChildren().add(basicInfoSection);
         //enemies and lovers
         relationshipSection = new GridPane();
-        relationshipSection.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(Color.rgb(239, 220, 189), null, new Insets(0))))
-                                                                          .otherwise(new Background(new BackgroundFill(Color.rgb(239, 220, 189).grayscale(), null, new Insets(0)))));
+        relationshipSection.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(MyColors.dutchWhite, null, new Insets(0))))
+                                                                          .otherwise(new Background(new BackgroundFill(MyColors.dutchWhite.grayscale(), null, new Insets(0)))));
         relationshipSection.setAlignment(Pos.TOP_CENTER);
         relationshipSection.prefWidthProperty().bind(this.widthProperty().multiply(0.9));
             //header
@@ -134,8 +136,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
             relationShipLabel.setAlignment(Pos.BOTTOM_CENTER);
             VBox relationShipHeader = new VBox(relationShipLabel);
             relationShipHeader.setAlignment(Pos.TOP_CENTER);
-            relationShipHeader.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(Color.rgb(249, 111, 93), new CornerRadii(0), new Insets(0)))).otherwise(new Background(new BackgroundFill(Color.rgb(249, 111, 93).grayscale(), new CornerRadii(0), new Insets(0)))));
-            relationShipHeader.borderProperty().bind(Bindings.when(alive).then(new Border(new BorderStroke(Color.rgb(224, 56, 34), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))).otherwise(new Border(new BorderStroke(Color.rgb(224, 56, 34).grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
+            relationShipHeader.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(MyColors.bittersweet, new CornerRadii(0), new Insets(0)))).otherwise(new Background(new BackgroundFill(MyColors.bittersweet.grayscale(), new CornerRadii(0), new Insets(0)))));
+            relationShipHeader.borderProperty().bind(Bindings.when(alive).then(new Border(new BorderStroke(MyColors.chiliRed, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))).otherwise(new Border(new BorderStroke(MyColors.chiliRed.grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
             relationShipHeader.prefWidthProperty().bind(relationshipSection.widthProperty());
             relationshipSection.add(relationShipHeader, 0, 0);
             GridPane.setColumnSpan(relationShipHeader, 4);
@@ -189,8 +191,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         this.getChildren().add(pieChartSection);
         //type overview
         typeOverviewSection = new GridPane();
-        typeOverviewSection.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(Color.rgb(239, 220, 189), null, new Insets(0))))
-                                                                          .otherwise(new Background(new BackgroundFill(Color.rgb(239, 220, 189).grayscale(), null, new Insets(0)))));
+        typeOverviewSection.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(MyColors.dutchWhite, null, new Insets(0))))
+                                                                          .otherwise(new Background(new BackgroundFill(MyColors.dutchWhite.grayscale(), null, new Insets(0)))));
         typeOverviewSection.setAlignment(Pos.TOP_CENTER);
         typeOverviewSection.minWidthProperty().bind(this.widthProperty().multiply(0.9));
         typeOverviewSection.setHgap(10);
@@ -199,11 +201,11 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
             VBox typeDistributionHeader = new VBox(typeHeaderLabel);
             typeDistributionHeader.setAlignment(Pos.TOP_CENTER);
             typeDistributionHeader.backgroundProperty().bind(Bindings.when(alive)
-                .then(new Background(new BackgroundFill(Color.rgb(169, 76, 169), new CornerRadii(0), new Insets(0))))
-                .otherwise(new Background(new BackgroundFill(Color.rgb(169, 76, 169).grayscale(), new CornerRadii(0), new Insets(0)))));
+                .then(new Background(new BackgroundFill(MyColors.purpureus, new CornerRadii(0), new Insets(0))))
+                .otherwise(new Background(new BackgroundFill(MyColors.purpureus.grayscale(), new CornerRadii(0), new Insets(0)))));
             typeDistributionHeader.borderProperty().bind(Bindings.when(alive)
-                .then(new Border(new BorderStroke(Color.rgb(113, 51, 113), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))))
-                .otherwise(new Border(new BorderStroke(Color.rgb(113, 51, 113).grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
+                .then(new Border(new BorderStroke(MyColors.finn, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))))
+                .otherwise(new Border(new BorderStroke(MyColors.finn.grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
             typeDistributionHeader.prefWidthProperty().bind(typeOverviewSection.widthProperty());
             GridPane.setColumnSpan(typeDistributionHeader, 4);
             typeOverviewSection.add(typeDistributionHeader, 0, 0);
@@ -255,11 +257,11 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         VBox familyTreeHeader = new VBox(familyTreeHeaderLabel);
         familyTreeHeader.setAlignment(Pos.TOP_CENTER);
         familyTreeHeader.backgroundProperty().bind(Bindings.when(alive)
-            .then(new Background(new BackgroundFill(Color.rgb(79, 207, 85), new CornerRadii(0), new Insets(0))))
-            .otherwise(new Background(new BackgroundFill(Color.rgb(79, 207, 85).grayscale(), new CornerRadii(0), new Insets(0)))));
+            .then(new Background(new BackgroundFill(MyColors.limeGreen, new CornerRadii(0), new Insets(0))))
+            .otherwise(new Background(new BackgroundFill(MyColors.limeGreen.grayscale(), new CornerRadii(0), new Insets(0)))));
         familyTreeHeader.borderProperty().bind(Bindings.when(alive)
-            .then(new Border(new BorderStroke(Color.rgb(35, 128, 40), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))))
-            .otherwise(new Border(new BorderStroke(Color.rgb(35, 128, 40).grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
+            .then(new Border(new BorderStroke(MyColors.officeGreen, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))))
+            .otherwise(new Border(new BorderStroke(MyColors.officeGreen.grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
         familyTreeSection.add(familyTreeHeader, 0, 0);
         GridPane.setColumnSpan(familyTreeHeader, 4);
 
@@ -305,8 +307,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
 
         //children
         childrenListSection = new GridPane();
-        childrenListSection.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(Color.rgb(239, 220, 189), null, new Insets(0))))
-                                                                          .otherwise(new Background(new BackgroundFill(Color.rgb(239, 220, 189).grayscale(), null, new Insets(0)))));
+        childrenListSection.backgroundProperty().bind(Bindings.when(alive).then(new Background(new BackgroundFill(MyColors.dutchWhite, null, new Insets(0))))
+                                                                          .otherwise(new Background(new BackgroundFill(MyColors.dutchWhite.grayscale(), null, new Insets(0)))));
         
         childrenListSection.setAlignment(Pos.TOP_CENTER);
         childrenListSection.minWidthProperty().bind(this.widthProperty().multiply(0.9));
@@ -342,11 +344,11 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
             
         });
         cSection.backgroundProperty().bind(Bindings.when(cLabel.aliveProperty())
-            .then(new Background(new BackgroundFill(Color.rgb(239, 220, 189), new CornerRadii(0), new Insets(0))))
-            .otherwise(new Background(new BackgroundFill(Color.rgb(239, 220, 189).grayscale(), new CornerRadii(0), new Insets(0)))));
+            .then(new Background(new BackgroundFill(MyColors.dutchWhite, new CornerRadii(0), new Insets(0))))
+            .otherwise(new Background(new BackgroundFill(MyColors.dutchWhite.grayscale(), new CornerRadii(0), new Insets(0)))));
         cSection.borderProperty().bind(Bindings.when(cLabel.aliveProperty())
-            .then(new Border(new BorderStroke(Color.rgb(231, 203, 156), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))))
-            .otherwise(new Border(new BorderStroke(Color.rgb(231, 203, 156).grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
+            .then(new Border(new BorderStroke(MyColors.sunset, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2))))
+            .otherwise(new Border(new BorderStroke(MyColors.sunset.grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2)))));
         cSection.prefWidthProperty().bind(familyTreeSection.widthProperty().divide(divideBy));
         cSection.setPrefHeight(familyTreeLabelHeight);
         cSection.setPadding(new Insets(0, 5, 0, 5));
@@ -430,11 +432,11 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
                     //lovesymbol
                     HeartShape heart = new HeartShape(symbolSize, Color.RED);
                     heart.getShapeToShow().fillProperty().bind(Bindings.when(alive)
-                        .then(Color.rgb(248, 112, 96))
-                        .otherwise(Color.rgb(248, 112, 96).grayscale()));
+                        .then(MyColors.bittersweet)
+                        .otherwise(MyColors.bittersweet.grayscale()));
                     heart.getShapeToShow().strokeProperty().bind(Bindings.when(alive)
-                        .then(Color.rgb(249, 87, 56))
-                        .otherwise(Color.rgb(249, 87, 56).grayscale()));
+                        .then(MyColors.tomato)
+                        .otherwise(MyColors.tomato.grayscale()));
                     heart.getShapeToShow().setStrokeWidth(4);
                     loveLabels.add(heart);
                     childrenListSection.add(heart.getShapeToShow(), 1, i+1);
@@ -443,11 +445,11 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
                     Polygon point = new Polygon(-symbolSize*0.4, -symbolSize*0.5, -symbolSize*0.4, symbolSize*0.5, 0, 0);
                     Shape arrow = Shape.union(base, point);
                     arrow.fillProperty().bind(Bindings.when(alive)
-                        .then(Color.rgb(85, 221, 224))
-                        .otherwise(Color.rgb(85, 221, 224).grayscale()));
+                        .then(MyColors.robinEggBlue)
+                        .otherwise(MyColors.robinEggBlue.grayscale()));
                     arrow.strokeProperty().bind(Bindings.when(alive)
-                        .then(Color.rgb(31, 211, 214))
-                        .otherwise(Color.rgb(31, 211, 214).grayscale()));
+                        .then(MyColors.robinEggBlue2)
+                        .otherwise(MyColors.robinEggBlue2.grayscale()));
                     arrow.setStrokeWidth(4);
                     resultLabels.add(arrow);
                     childrenListSection.add(arrow, 3, i+1);

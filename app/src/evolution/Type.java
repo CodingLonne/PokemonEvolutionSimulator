@@ -30,7 +30,7 @@ public enum Type {
 
     
 
-    Color getColor() {
+    public Color getColor() {
         switch(this) {
             case BUG:
                 return Color.CHARTREUSE;

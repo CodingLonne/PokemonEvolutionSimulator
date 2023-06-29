@@ -2,11 +2,13 @@ package evolution;
 
 import java.util.LinkedList;
 
+import evolution.Interfaces.CreaturePlaceField;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class World {
-    double width;
-    double height;
+public class World implements CreaturePlaceField {
+    SimpleDoubleProperty worldSize;
 
     LinkedList<Creature> allCreatures;
     LinkedList<CreatureListener> creatureListeners;
@@ -15,29 +17,37 @@ public class World {
 
     proteinEncodingManager geneEncoder;
 
+    SimpleIntegerProperty day;
+
     interface CreatureListener{
         void onCreatureCreate(Creature c);
         void onCreatureDelete(Creature c);
         void onCreatureUpdate(Creature c);
     }
     interface WorldListener{
-        void setupNeededConnections(SimpleIntegerProperty day);
+        void setupNeededConnections(SimpleIntegerProperty day, SimpleDoubleProperty worldSize);
     }
     interface CreatureClickListener{
         void OnCreatureClick(Creature c);
     }
 
     World(double size, proteinEncodingManager encoder) {
-        this.width = size;
-        this.height = size;
+        worldSize = new SimpleDoubleProperty(size);
         allCreatures = new LinkedList<>();
         creatureListeners = new LinkedList<>();
         worldListeners = new LinkedList<>();
         creatureClickListeners = new LinkedList<>();
         geneEncoder = encoder;
+        day = new SimpleIntegerProperty(0);
     }
 
-    public void addCreature(int x, int y) {
+    public void initialize() {
+        for (WorldListener w: worldListeners) {
+            w.setupNeededConnections(day, worldSize);
+        }
+    }
+
+    public void addCreature(double x, double y) {
         Creature newCreature = new Creature(this, x, y, geneEncoder);
         allCreatures.add(newCreature);
         for (CreatureListener listener : creatureListeners) {
@@ -48,7 +58,7 @@ public class World {
         }
     }
 
-    public void addCreature(int x, int y, Dna dna) {
+    public void addCreature(double x, double y, Dna dna) {
         Creature newCreature = new Creature(this, x, y, dna, geneEncoder);
         allCreatures.add(newCreature);
         for (CreatureListener listener : creatureListeners) {
@@ -89,6 +99,18 @@ public class World {
     public LinkedList<Creature> getCreatures() {
         return allCreatures;
     }
+
+    public double getWorldSize() {
+        return worldSize.get();
+    }
+
+    public void setWorldSize(double d) {
+        worldSize.set(d);
+    }
+
+    public DoubleProperty worldSizeProperty() {
+        return worldSize;
+    }
     
     public void addCreatureListener(CreatureListener listener) {
         creatureListeners.add(listener);
@@ -100,6 +122,10 @@ public class World {
 
     public void addCreatureClickListener(CreatureClickListener listener) {
         creatureClickListeners.add(listener);
+    }
+
+    public proteinEncodingManager getEncoder() {
+        return geneEncoder;
     }
 
 }

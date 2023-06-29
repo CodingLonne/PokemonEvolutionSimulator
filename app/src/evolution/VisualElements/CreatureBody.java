@@ -5,7 +5,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
 public class CreatureBody extends Circle {
-    private Creature host;
+    private final Creature host;
     public CreatureBody(Creature host) {
         super();
         this.host = host;
