@@ -428,7 +428,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
         typeOffenseAmount = setUpTypePiechartData();
         pieChartSection = new HBox();
         defenseAmountPieChart = new TypePieChart(typeDefenseAmount, pieChartSection.widthProperty().multiply(0.5), "defense", "No data\nfound");
-        offenseAmountPieChart = new TypePieChart(typeOffenseAmount, pieChartSection.widthProperty().multiply(0.5), "defense", "No data\nfound");
+        offenseAmountPieChart = new TypePieChart(typeOffenseAmount, pieChartSection.widthProperty().multiply(0.5), "offense", "No data\nfound");
         pieChartSection.getChildren().addAll(defenseAmountPieChart, offenseAmountPieChart);
         this.getChildren().add(pieChartSection);
     }
