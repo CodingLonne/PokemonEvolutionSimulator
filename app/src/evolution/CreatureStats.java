@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import evolution.ScreenManager.screenManagerOwned;
 import evolution.VisualElements.HeartShape;
 import evolution.VisualElements.MyColors;
+import evolution.VisualElements.TypePieChart;
 import evolution.World.CreatureClickListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.binding.Bindings;
@@ -91,9 +92,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     private LinkedList<CreatureLabel> fatherLabels;
     private LinkedList<Shape> resultLabels;
     private LinkedList<CreatureLabel> childLabels;
-    CreatureStats(proteinEncodingManager encodingManager) {
+    CreatureStats() {
         super();
-        encodingManager.addListener(this);
         title = new SimpleStringProperty("individual stats");
         creatureSelected = new SimpleBooleanProperty(false);
         alive = new SimpleBooleanProperty(true);

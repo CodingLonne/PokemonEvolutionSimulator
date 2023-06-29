@@ -5,6 +5,7 @@ import java.util.HashMap;
 import evolution.ScreenManager.screenManagerOwned;
 import evolution.VisualElements.MyColors;
 import evolution.VisualElements.TypeCodeDisplay;
+import evolution.VisualElements.TypePieChart;
 import evolution.World.CreatureListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.binding.Bindings;
@@ -69,7 +70,6 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
         super();
         this.world = world;
         this.encodingManager = encodingManager;
-        encodingManager.addListener(this);
         title = new SimpleStringProperty("genes");
         //piechart section
         typeDefenseData = setUpTypePiechartData();

@@ -1,9 +1,10 @@
-package evolution;
+package evolution.VisualElements;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import evolution.Type;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.NumberBinding;
@@ -36,7 +37,7 @@ public class TypePieChart extends Pane{
     private SimpleBooleanProperty desaturated;
     private SimpleBooleanProperty grayscale;
     private HashMap<Type, SimpleDoubleProperty> fractions;
-    TypePieChart(HashMap<Type, SimpleIntegerProperty> data, DoubleBinding width, String name, String noDataErrorMessage) {
+    public TypePieChart(HashMap<Type, SimpleIntegerProperty> data, DoubleBinding width, String name, String noDataErrorMessage) {
         this.prefWidthProperty().bind(width);
         this.minHeightProperty().bind(width.add(30));
         desaturated = new SimpleBooleanProperty(false);

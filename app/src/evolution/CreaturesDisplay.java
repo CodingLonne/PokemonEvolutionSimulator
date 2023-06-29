@@ -12,7 +12,9 @@ import evolution.VisualElements.MyCheckboxSkin;
 import evolution.VisualElements.MyChoiceBoxSkin;
 import evolution.VisualElements.MyColors;
 import evolution.VisualElements.TypeChoiceBox;
+import evolution.VisualElements.TypePieChart;
 import evolution.World.CreatureListener;
+import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -38,6 +40,7 @@ import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -45,7 +48,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 
-public class CreaturesDisplay extends VBox implements CreatureListener{
+public class CreaturesDisplay extends VBox implements CreatureListener, proteinChangeListener{
     //basic
     private LinkedList<Creature> creatures;
     private List<CreaturePlaceField> creatureBiomes;
@@ -68,13 +71,19 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
     private SimpleIntegerProperty geneAmount;
     private HashMap<Type, SimpleIntegerProperty> typeDefenseData;
     private HashMap<Type, SimpleIntegerProperty> typeOffenseData;
-    private Comparator<Type> byDefense;
-    private Comparator<Type> byOffense;
+    private Comparator<Type> byDefenseSpawn;
+    private Comparator<Type> byOffenseSpawn;
     private SimpleBooleanProperty geneRandomness;
 
     //gene amounts
     private HashMap<Type, SimpleIntegerProperty> typeDefenseAmount;
     private HashMap<Type, SimpleIntegerProperty> typeOffenseAmount;
+    private HashMap<Type, Node> typeDefenseLabel;
+    private HashMap<Type, Node> typeDefenseValue;
+    private HashMap<Type, Node> typeOffenseLabel;
+    private HashMap<Type, Node> typeOffenseValue;
+    private Comparator<Type> byDefense;
+    private Comparator<Type> byOffense;
 
     //visual variables
 
@@ -95,6 +104,9 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
     private HBox pieChartSection;
         private TypePieChart defenseAmountPieChart;
         private TypePieChart offenseAmountPieChart;
+    private VBox geneAmountSection;
+        private VBox geneAmountHeader;
+        private GridPane geneAmountDisplay;
 
     //components
     private Label titleLabel;
@@ -328,8 +340,8 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
             //gene overview
             maxGenes = Chromosome.maxLenght*2/(5+Math.max(Chromosome.getDefenseInit().length(), Chromosome.getOffenseInit().length()));
             geneAmount = new SimpleIntegerProperty(0);
-            byDefense = (Type d1, Type d2)->Integer.valueOf(typeDefenseData.get(d2).get()).compareTo(Integer.valueOf(typeDefenseData.get(d1).get()));
-            byOffense = (Type o1, Type o2)->Integer.valueOf(typeOffenseData.get(o2).get()).compareTo(Integer.valueOf(typeOffenseData.get(o1).get()));
+            byDefenseSpawn = (Type d1, Type d2)->Integer.valueOf(typeDefenseData.get(d2).get()).compareTo(Integer.valueOf(typeDefenseData.get(d1).get()));
+            byOffenseSpawn = (Type o1, Type o2)->Integer.valueOf(typeOffenseData.get(o2).get()).compareTo(Integer.valueOf(typeOffenseData.get(o1).get()));
             
             //defense pie chart
             defensePieChart = new TypePieChart(typeDefenseData, engineeringBox.widthProperty().multiply(0.25), "defense", "no genes\nselected");
@@ -431,6 +443,88 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
         offenseAmountPieChart = new TypePieChart(typeOffenseAmount, pieChartSection.widthProperty().multiply(0.5), "offense", "No data\nfound");
         pieChartSection.getChildren().addAll(defenseAmountPieChart, offenseAmountPieChart);
         this.getChildren().add(pieChartSection);
+
+        //gene display
+        byDefense = (Type d1, Type d2)->Integer.valueOf(typeDefenseAmount.get(d2).get()).compareTo(Integer.valueOf(typeDefenseAmount.get(d1).get()));
+        byOffense = (Type o1, Type o2)->Integer.valueOf(typeOffenseAmount.get(o2).get()).compareTo(Integer.valueOf(typeOffenseAmount.get(o1).get()));
+        typeDefenseLabel = new HashMap<>();
+        typeOffenseLabel = new HashMap<>();
+        typeDefenseValue = new HashMap<>();
+        typeOffenseValue = new HashMap<>();
+        for (Type t: Type.allTypes()) {
+            Label dl = new Label();
+            Label ol = new Label();
+            Label dv = new Label();
+            Label ov = new Label();
+            dl.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+            ol.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+            dv.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+            ov.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+            dl.setText(t.toString());
+            ol.setText(t.toString());
+            dv.textProperty().bind(typeDefenseAmount.get(t).asString());
+            ov.textProperty().bind(typeOffenseAmount.get(t).asString());
+            dl.setTextFill(t.getColor());
+            ol.setTextFill(t.getColor());
+            dv.setTextFill(t.getColor());
+            ov.setTextFill(t.getColor());
+            typeDefenseLabel.put(t, dl);
+            typeOffenseLabel.put(t, ol);
+            typeDefenseValue.put(t, dv);
+            typeOffenseValue.put(t, ov);
+        }
+        geneAmountSection = new VBox();
+        geneAmountSection.setBackground(new Background(new BackgroundFill(MyColors.dutchWhite, new CornerRadii(5), new Insets(0))));
+        geneAmountSection.setBorder(new Border(new BorderStroke(MyColors.earthYellow, BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1), new Insets(0))));
+        geneAmountSection.setAlignment(Pos.TOP_CENTER);
+            Label geneAmountLabel = new Label("Gene leaderboard");
+            geneAmountLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
+            geneAmountLabel.setAlignment(Pos.BOTTOM_CENTER);
+            geneAmountHeader = new VBox(geneAmountLabel);
+            geneAmountHeader.setBackground(new Background(new BackgroundFill(MyColors.bittersweet, new CornerRadii(5), new Insets(-2))));
+            geneAmountHeader.setBorder(new Border(new BorderStroke(MyColors.chiliRed, BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(2), new Insets(-2))));
+            geneAmountHeader.prefWidthProperty().bind(geneAmountSection.widthProperty());
+            geneAmountHeader.setPrefHeight(50);
+            geneAmountHeader.setPadding(new Insets(2, 10, 2, 10));
+        geneAmountSection.getChildren().add(geneAmountHeader);
+            geneAmountDisplay = new GridPane();
+            geneAmountDisplay.prefWidthProperty().bind(geneAmountSection.widthProperty());
+            geneAmountDisplay.setAlignment(Pos.TOP_CENTER);
+            geneAmountDisplay.setHgap(25);
+            updateTypeLeaderBoard();
+        geneAmountSection.getChildren().add(geneAmountDisplay);
+        geneAmountSection.prefHeightProperty().bind(geneAmountHeader.heightProperty().add(geneAmountDisplay.heightProperty()));
+        this.getChildren().add(geneAmountSection);
+        
+    }
+
+    private void updateTypeLeaderBoard() {
+        List<Type> types = Arrays.asList(Type.allTypes());
+        Type t;
+        //defense
+        for (Type r: Type.allTypes()) {
+            geneAmountDisplay.getChildren().remove(typeDefenseLabel.get(r));
+            geneAmountDisplay.getChildren().remove(typeDefenseValue.get(r));
+        }
+        types.sort(byDefense);
+        for (int i=0; i<types.size(); i++) {
+            t = types.get(i);
+
+            geneAmountDisplay.add(typeDefenseValue.get(t), 0, i);
+            geneAmountDisplay.add(typeDefenseLabel.get(t), 1, i);
+        }
+        //offense
+        for (Type r: Type.allTypes()) {
+            geneAmountDisplay.getChildren().remove(typeOffenseLabel.get(r));
+            geneAmountDisplay.getChildren().remove(typeOffenseValue.get(r));
+        }
+        types.sort(byOffense);
+        for (int i=0; i<types.size(); i++) {
+            t = types.get(i);
+            geneAmountDisplay.add(typeOffenseValue.get(t), 2, i);
+            geneAmountDisplay.add(typeOffenseLabel.get(t), 3, i);
+        }
+
     }
 
     private void SpawnCreatures(double xCenter, double yCenter) {
@@ -444,7 +538,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
             HashMap<Type, Integer> offense = typeOffenseData.entrySet().stream().collect(() -> new HashMap<>(), (c, e) -> c.put(e.getKey(), e.getValue().get()), (c1, c2) -> c1.putAll(c2));
             if (creatureAddGeneModification.get()) {
                 for (CreaturePlaceField f: creatureBiomes) {
-                    if (creatureAddWhere.get().equals("along the edge")) {
+                    if (creatureAddWhere.get() != null && creatureAddWhere.get().equals("along the edge")) {
                         radius = f.getWorldSize();
                     } else {
                         radius = 1;
@@ -453,7 +547,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
                 }
             } else {
                 for (CreaturePlaceField f: creatureBiomes) {
-                    if (creatureAddWhere.get().equals("along the edge")) {
+                    if (creatureAddWhere.get() != null && creatureAddWhere.get().equals("along the edge")) {
                         radius = f.getWorldSize();
                     } else {
                         radius = 1;
@@ -497,6 +591,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
             typeDefenseAmount.get(t).set(typeDefenseAmount.get(t).get()+c.getDefenseMap().get(t));
             typeOffenseAmount.get(t).set(typeOffenseAmount.get(t).get()+c.getOffenseMap().get(t));
         }
+        updateTypeLeaderBoard();
     }
 
     private void updateCreatureEngineerBox(boolean visible) {
@@ -533,7 +628,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
             defenseGeneList.getChildren().remove(typeDefenseNodes.get(tDefense));
         }
         //defense add
-        ranklist.sort(byDefense);
+        ranklist.sort(byDefenseSpawn);
         for (int i=0; i<ranklist.size(); i++) {
             t = ranklist.get(i);
             if (typeDefenseData.get(t).get() > 0) {
@@ -545,7 +640,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
             offenseGeneList.getChildren().remove(typeOffenseNodes.get(tOffense));
         }
         //offense add
-        ranklist.sort(byOffense);
+        ranklist.sort(byOffenseSpawn);
         for (int i=0; i<ranklist.size(); i++) {
             t = ranklist.get(i);
             if (typeOffenseData.get(t).get() > 0) {
@@ -554,7 +649,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
         }
     }
 
-    public HashMap<Type, SimpleIntegerProperty> setUpTypePiechartData() {
+    private HashMap<Type, SimpleIntegerProperty> setUpTypePiechartData() {
         HashMap<Type, SimpleIntegerProperty> newHashMap = new HashMap<Type, SimpleIntegerProperty>();
         for (Type t: Type.allTypes()) {
             newHashMap.put(t, new SimpleIntegerProperty(0));
@@ -602,6 +697,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
             typeDefenseAmount.get(t).set(typeDefenseAmount.get(t).get()-c.getDefenseMap().get(t));
             typeOffenseAmount.get(t).set(typeOffenseAmount.get(t).get()-c.getOffenseMap().get(t));
         }
+        updateTypeLeaderBoard();
     }
     @Override
     public void onCreatureUpdate(Creature c) {
@@ -611,5 +707,15 @@ public class CreaturesDisplay extends VBox implements CreatureListener{
 
     public void addCreatureBiome(CreaturePlaceField p) {
         creatureBiomes.add(p);
+    }
+
+    @Override
+    public void onProteinChange() {
+        return;
+    }
+
+    @Override
+    public void onProteinChangeFinished() {
+        updateTypeLeaderBoard();
     }
 }

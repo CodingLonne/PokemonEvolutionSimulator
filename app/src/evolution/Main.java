@@ -57,7 +57,7 @@ public class Main extends Application{
                     CreaturesDisplay creatureOverview = new CreaturesDisplay();
                     creatureOverview.setPrefWidth(550);
 
-                    CreatureStats creatureStats = new CreatureStats(encoder);
+                    CreatureStats creatureStats = new CreatureStats();
                     creatureStats.setPadding(new Insets(5, 30, 5, 20));
                     creatureStats.setPrefWidth(550);
 
@@ -92,6 +92,9 @@ public class Main extends Application{
         mainLogic.addCreatureClickListener(creatureStats);
         mainLogic.addCreatureClickListener(screenSwapper);
         creatureOverview.addCreatureBiome(mainLogic);
+        encoder.addListener(creatureStats);
+        encoder.addListener(creatureOverview);
+        encoder.addListener(typeStats);
 
         //initialize stuff when needed
         mainLogic.initialize();
@@ -102,7 +105,7 @@ public class Main extends Application{
         primaryStage.show();
 
 
-        /* 
+        
         int mutations = 3;
         double crossingOver = 0.1;
         for (int x5=0; x5<32; x5++) {
@@ -123,7 +126,7 @@ public class Main extends Application{
         for (int x0=0; x0<1; x0++) { //-512+64*x4, -210
             mainLogic.addCreature(Relationship.breed(mainLogic, -512+1024*x0, -50, mainLogic.getCreature(60+x0*2), mainLogic.getCreature(60+x0*2+1), mutations, crossingOver, encoder));
         }
-        */
+        
         /*
         for (int x=0; x<45; x++) {
             if (x%3 == 2) {
