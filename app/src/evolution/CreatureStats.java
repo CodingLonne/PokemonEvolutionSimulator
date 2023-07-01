@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import evolution.ScreenManager.screenManagerOwned;
 import evolution.VisualElements.HeartShape;
 import evolution.VisualElements.MyColors;
+import evolution.VisualElements.MyStatsBar;
 import evolution.VisualElements.TypePieChart;
 import evolution.World.CreatureClickListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
@@ -68,6 +69,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     private Label healthInfo;
     private Label energyInfo;
     private Label ageInfo;
+    private MyStatsBar healthBar;
+    private MyStatsBar energyBar;
     private CreatureLabel[] loverNames;
     private Label[] loverDistances;
     private CreatureLabel[] enemyNames;
@@ -117,13 +120,27 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         this.getChildren().add(headerSection);
         //basic info
         basicInfoSection = new VBox();
-        healthInfo = new Label("Health: -");
-        energyInfo = new Label("Energy: -");
-        ageInfo = new Label("Age: -");
+        healthInfo = new Label("Health:");
+        energyInfo = new Label("Energy:");
+        ageInfo = new Label("Age:");
         healthInfo.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
         energyInfo.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
         ageInfo.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
-        basicInfoSection.getChildren().addAll(healthInfo, energyInfo, ageInfo);
+        healthBar = new MyStatsBar(1);
+        healthBar.setColorScheme(MyColors.cherryBlossomPink, MyColors.folly);
+        healthBar.setPrefWidth(200);
+        healthBar.setPrefHeight(30);
+        energyBar = new MyStatsBar(1);
+        energyBar.setColorScheme(MyColors.lightGreen2, MyColors.SGBUSGreen);
+        energyBar.setPrefWidth(200);
+        energyBar.setPrefHeight(30);
+        HBox healthBox = new HBox(healthInfo, healthBar);
+        HBox energyBox = new HBox(energyInfo, energyBar);
+        healthBox.setPadding(new Insets(3));
+        energyBox.setPadding(new Insets(3));
+        healthBox.setSpacing(10);
+        energyBox.setSpacing(10);
+        basicInfoSection.getChildren().addAll(healthBox, energyBox, ageInfo);
         this.getChildren().add(basicInfoSection);
         //enemies and lovers
         relationshipSection = new GridPane();
@@ -539,10 +556,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         titleLabel.textFillProperty().unbind();
         titleLabel.setTextFill(Color.BLACK);
         //basic info
-        healthInfo.textProperty().unbind();
-        healthInfo.setText("Health: -");
-        energyInfo.textProperty().unbind();
-        energyInfo.setText("Energy: -");
+        healthBar.progressProperty().unbind();
+        energyBar.progressProperty().unbind();
         ageInfo.textProperty().unbind();
         ageInfo.setText("Age: -");
         alive.unbind();
@@ -578,8 +593,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
                 .then(c.mostProminentType().getColor())
                 .otherwise(c.mostProminentType().getColor().desaturate()));
             //basic info
-            healthInfo.textProperty().bind(Bindings.concat("Health: ", c.healthProperty().asString()));
-            energyInfo.textProperty().bind(Bindings.concat("Energy: ", c.energyProperty().asString()));
+            healthBar.progressProperty().bind(c.healthProperty().divide(c.maxHealthProperty()));
+            energyBar.progressProperty().bind(c.energyProperty().divide(c.maxEnergyProperty()));
             ageInfo.textProperty().bind(Bindings.concat("Age: ", c.ageProperty().asString()));
             alive.bind(c.aliveProperty());
             //type map

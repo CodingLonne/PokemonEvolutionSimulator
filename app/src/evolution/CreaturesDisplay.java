@@ -338,7 +338,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
             removeGenesBox.getChildren().addAll(removeButton, removeTypeChoiceBox, geneLabelRemoveGenes, removeDefOffChoiceBox);
 
             //gene overview
-            maxGenes = Chromosome.maxLenght*2/(5+Math.max(Chromosome.getDefenseInit().length(), Chromosome.getOffenseInit().length()));
+            maxGenes = Chromosome.maxLenght*2/(proteinEncodingManager.proteinLenght+Math.max(Chromosome.getDefenseInit().length(), Chromosome.getOffenseInit().length()));
             geneAmount = new SimpleIntegerProperty(0);
             byDefenseSpawn = (Type d1, Type d2)->Integer.valueOf(typeDefenseData.get(d2).get()).compareTo(Integer.valueOf(typeDefenseData.get(d1).get()));
             byOffenseSpawn = (Type o1, Type o2)->Integer.valueOf(typeOffenseData.get(o2).get()).compareTo(Integer.valueOf(typeOffenseData.get(o1).get()));
@@ -541,7 +541,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
                     if (creatureAddWhere.get() != null && creatureAddWhere.get().equals("along the edge")) {
                         radius = f.getWorldSize();
                     } else {
-                        radius = 1;
+                        radius = 15;
                     }
                     f.addCreature(xCenter+radius*Math.cos(offset+step*a), yCenter+radius*Math.sin(offset+step*a), Dna.artificialDna(defense, offense, geneRandomness.get(), f.getEncoder()));
                 }
@@ -550,7 +550,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
                     if (creatureAddWhere.get() != null && creatureAddWhere.get().equals("along the edge")) {
                         radius = f.getWorldSize();
                     } else {
-                        radius = 1;
+                        radius = 15;
                     }
                     f.addCreature(xCenter+radius*Math.cos(offset+step*a), yCenter+radius*Math.sin(offset+step*a));
                 }
@@ -603,6 +603,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
             for (Type t: Type.allTypes()) {
                 typeDefenseData.get(t).set(0);
                 typeOffenseData.get(t).set(0);
+                geneAmount.set(0);
             }
         }
     }
@@ -701,8 +702,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
     }
     @Override
     public void onCreatureUpdate(Creature c) {
-        // TODO Auto-generated method stub
-        //throw new UnsupportedOperationException("Unimplemented method 'onCreatureUpdate'");
+        return;
     }
 
     public void addCreatureBiome(CreaturePlaceField p) {

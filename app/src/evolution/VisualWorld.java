@@ -25,6 +25,7 @@ public class VisualWorld extends Pane implements World.CreatureListener, World.W
     private int heartLayer = 5;
     private int attackLayer = 4;
     private int creatureLayer = 3;
+    private int arrowLayer = 2;
 
     VisualWorld(int size) {
         this.setPrefWidth(size);

@@ -22,7 +22,7 @@ public class MyColors {
     static public Color iceBlue = Color.rgb(152, 235, 236);
     static public Color robinEggBlue = Color.rgb(85, 221, 224);
     static public Color robinEggBlue2 = Color.rgb(31, 211, 214);
-    static public Color verdrigis = Color.rgb(13, 168, 171);
+    static public Color verdrigis = Color.rgb(13, 168, 171); //0DA8AB
     
     //dark blue of deafault palet
     static public Color ylnMnBlue = Color.rgb(47, 84, 117);
@@ -60,4 +60,12 @@ public class MyColors {
     static public Color blush = Color.rgb(211, 95, 143);
     static public Color magentaPantone = Color.rgb(207, 79, 132);
     static public Color teleMagenta = Color.rgb(192, 53, 111);
+
+    //health bar
+    static public Color cherryBlossomPink = Color.rgb(255, 173, 179);
+    static public Color folly = Color.rgb(255, 66, 79);
+
+    //energy bar
+    static public Color lightGreen2 = Color.rgb(198, 255, 173);
+    static public Color SGBUSGreen = Color.rgb(85, 222, 27);
 }

@@ -2,6 +2,7 @@ package evolution;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 
 import evolution.Relationship.Relation;
 import evolution.World.CreatureClickListener;
@@ -16,6 +17,10 @@ public class Creature implements proteinChangeListener{
     private final static double defaultSize = 16;
     private final static double defaultSpeed = 2;
     private final static double defaultSense = 100;
+    private final static double defaultMaxHealth = 100;
+    private final static double defaultMaxEnergy = 200;
+    private SimpleDoubleProperty maxHealth;
+    private SimpleDoubleProperty maxEnergy;
 
     private Dna dna;
     private World world;
@@ -54,8 +59,12 @@ public class Creature implements proteinChangeListener{
         this.dna = dna;
         name = new SimpleStringProperty("unnamed");
         this.age = new SimpleIntegerProperty(0);
+
+        maxHealth = new SimpleDoubleProperty(defaultMaxHealth);
+        maxEnergy = new SimpleDoubleProperty(defaultMaxEnergy);
         this.health = new SimpleDoubleProperty(health);
         this.energy = new SimpleDoubleProperty(energy);
+
         this.alive = new SimpleBooleanProperty(true);
         this.horniness = 0d;
         this.isSleeping = new SimpleBooleanProperty(false);
@@ -71,14 +80,18 @@ public class Creature implements proteinChangeListener{
         encoder.addListener(this);
         creatureClickListeners = new LinkedList<>();
         this.world = world;
+        //TODO remove this
+        Random random = new Random();
+        this.health.set(random.nextDouble(maxHealth.get()));
+        this.energy.set(random.nextDouble(maxEnergy.get()));
     }
 
     Creature(World world, double x, double y, Dna dna, proteinEncodingManager encoder) {
-        this(world, x, y, dna, 100, 200, encoder);
+        this(world, x, y, dna, defaultMaxHealth, defaultMaxEnergy, encoder);
     }
 
     Creature(World world, double x, double y, proteinEncodingManager encoder) {
-        this(world, x, y, Dna.randomDna(encoder), 100, 200, encoder);
+        this(world, x, y, Dna.randomDna(encoder), defaultMaxHealth, defaultMaxEnergy, encoder);
     }
 
     public Type mostProminentType() {
@@ -133,6 +146,14 @@ public class Creature implements proteinChangeListener{
 
     public double getEnergy() {
         return energy.get();
+    }
+
+    public double getMaxHealth() {
+        return maxHealth.get();
+    }
+
+    public double getMaxEnergy() {
+        return maxEnergy.get();
     }
 
     public int getAge() {
@@ -212,6 +233,14 @@ public class Creature implements proteinChangeListener{
         age.set(a);
     }
 
+    public void setMaxHealth(double h) {
+        maxHealth.set(h);
+    }
+
+    public void setMaxEnergy(double e) {
+        maxEnergy.set(e);
+    }
+
     public void setAlive(boolean b) {
         alive.set(b);
     }
@@ -273,6 +302,14 @@ public class Creature implements proteinChangeListener{
 
     public SimpleIntegerProperty ageProperty() {
         return age;
+    }
+
+    public SimpleDoubleProperty maxHealthProperty() {
+        return maxHealth;
+    }
+
+    public SimpleDoubleProperty maxEnergyProperty() {
+        return maxEnergy;
     }
 
     public SimpleBooleanProperty aliveProperty() {
