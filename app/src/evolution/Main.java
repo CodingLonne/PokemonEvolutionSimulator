@@ -102,11 +102,12 @@ public class Main extends Application{
         primaryStage.show();
 
 
-        /* 
+        
         int mutations = 3;
         double crossingOver = 0.1;
         for (int x5=0; x5<32; x5++) {
             mainLogic.addCreature(-512+32*x5, -250);
+            mainLogic.getCreature(x5).setAlive(false);
         }
         for (int x4=0; x4<16; x4++) { //-512+64*x4, -210
             mainLogic.addCreature(Relationship.breed(mainLogic, -512+64*x4, -210, mainLogic.getCreature(x4*2), mainLogic.getCreature(x4*2+1), mutations, crossingOver, encoder));
@@ -123,7 +124,7 @@ public class Main extends Application{
         for (int x0=0; x0<1; x0++) { //-512+64*x4, -210
             mainLogic.addCreature(Relationship.breed(mainLogic, -512+1024*x0, -50, mainLogic.getCreature(60+x0*2), mainLogic.getCreature(60+x0*2+1), mutations, crossingOver, encoder));
         }
-        */
+        
         /*
         for (int x=0; x<45; x++) {
             if (x%3 == 2) {

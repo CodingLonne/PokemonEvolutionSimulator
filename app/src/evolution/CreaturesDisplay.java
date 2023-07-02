@@ -6,11 +6,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import evolution.Interfaces.CreaturePlaceField;
+import evolution.VisualElements.CreatureInfoDisplay;
 import evolution.VisualElements.MyCheckboxSkin;
 import evolution.VisualElements.MyChoiceBoxSkin;
 import evolution.VisualElements.MyColors;
+import evolution.VisualElements.TwoFacedCheckBox;
 import evolution.VisualElements.TypeChoiceBox;
 import evolution.VisualElements.TypePieChart;
 import evolution.World.CreatureListener;
@@ -18,6 +22,7 @@ import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -32,6 +37,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -42,11 +48,15 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.util.StringConverter;
+import javafx.util.converter.DefaultStringConverter;
 
 public class CreaturesDisplay extends VBox implements CreatureListener, proteinChangeListener{
     //basic
@@ -85,6 +95,17 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
     private Comparator<Type> byDefense;
     private Comparator<Type> byOffense;
 
+    //creature list
+    private SimpleObjectProperty<Atributes> sortingKind;
+    private SimpleBooleanProperty inverseSort;
+    private SimpleObjectProperty<Atributes> filteringKind;
+    private LinkedList<CreatureInfoDisplay> creatureDisplays;
+    private SimpleIntegerProperty creatureDisplaysShown;
+    private List<Creature> creatureList;
+    private SimpleStringProperty searchText;
+    private SimpleObjectProperty<FilterComparators> filterComparator;
+    private SimpleDoubleProperty filterAmount;
+
     //visual variables
 
     //boxes
@@ -107,6 +128,18 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
     private VBox geneAmountSection;
         private VBox geneAmountHeader;
         private GridPane geneAmountDisplay;
+    private VBox creatureViewSection;
+        private VBox creatureViewHeader;
+        private HBox creatureListPropertiesBox;
+            private VBox creatureListSortingBox;
+                private HBox creatureChoiceSortingBox;
+                private HBox creatureSortButtonBox;
+            private VBox creatureListFilteringBox;
+                private HBox creatureChoiceFilteringBox;
+                private HBox creatureListFilterSettingBox;
+                private HBox creatureFilterButtonBox;
+        private ScrollPane creatureListScrollPane;
+            private VBox creatureListBox;
 
     //components
     private Label titleLabel;
@@ -123,7 +156,15 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
     private HashMap<Type, Node> typeOffenseNodes;
     private CheckBox suppressRandomnessCheck;
     private Button spawnButton;
-
+    private ChoiceBox<Atributes> sortingChoiceBox;
+    private Button sortButton;
+    private CheckBox sortOrderCheckBox;
+    private ChoiceBox<Atributes> filteringChoiceBox;
+    private Label filterLabel;
+    private TextField nameSearchField;
+    private ChoiceBox<FilterComparators> comparatorChoiceBox;
+    private TextField compareToField;
+    private Button filterButton;
     public CreaturesDisplay() {
         this.setStyle("-fx-background-color: #EAD2AC;");
         this.setPadding(new Insets(5, 30, 5, 20));
@@ -208,7 +249,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
         whereChoiceBox = new ChoiceBox<>();
         whereChoiceBox.getItems().addAll("along the edge", "in the middle");
         whereChoiceBox.setValue("in the middle");
-        MyChoiceBoxSkin whereChoiceBoxSkin = new MyChoiceBoxSkin(whereChoiceBox);
+        MyChoiceBoxSkin<String> whereChoiceBoxSkin = new MyChoiceBoxSkin<>(whereChoiceBox, new DefaultStringConverter());
         whereChoiceBoxSkin.setBackgroundColorField(MyColors.iceBlue);
         whereChoiceBoxSkin.setBorderColorField(MyColors.verdrigis);
         whereChoiceBoxSkin.setCellSize(35);
@@ -283,7 +324,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
             geneLabelAddGenes.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 23));
             addDefOffChoiceBox = new ChoiceBox<>();
             addDefOffChoiceBox.getItems().addAll("defense", "offense");
-            MyChoiceBoxSkin addDefOffChoiceBoxSkin = new MyChoiceBoxSkin(addDefOffChoiceBox);
+            MyChoiceBoxSkin<String> addDefOffChoiceBoxSkin = new MyChoiceBoxSkin<>(addDefOffChoiceBox, new DefaultStringConverter());
             addDefOffChoiceBoxSkin.setBackgroundColorField(MyColors.amaranthPink);
             addDefOffChoiceBoxSkin.setBorderColorField(MyColors.magentaPantone);
             addDefOffChoiceBoxSkin.setCellSize(35);
@@ -324,7 +365,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
             geneLabelRemoveGenes.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 23));
             removeDefOffChoiceBox = new ChoiceBox<>();
             removeDefOffChoiceBox.getItems().addAll("defense", "offense");
-            MyChoiceBoxSkin removeDefOffChoiceBoxSkin = new MyChoiceBoxSkin(removeDefOffChoiceBox);
+            MyChoiceBoxSkin<String> removeDefOffChoiceBoxSkin = new MyChoiceBoxSkin<>(removeDefOffChoiceBox, new DefaultStringConverter());
             removeDefOffChoiceBoxSkin.setBackgroundColorField(MyColors.amaranthPink);
             removeDefOffChoiceBoxSkin.setBorderColorField(MyColors.magentaPantone);
             removeDefOffChoiceBoxSkin.setCellSize(35);
@@ -495,7 +536,190 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
         geneAmountSection.getChildren().add(geneAmountDisplay);
         geneAmountSection.prefHeightProperty().bind(geneAmountHeader.heightProperty().add(geneAmountDisplay.heightProperty()));
         this.getChildren().add(geneAmountSection);
-        
+
+        //creature list
+        creatureList = new LinkedList<>();
+        creatureDisplays = new LinkedList<>();
+        creatureDisplaysShown = new SimpleIntegerProperty(0);
+        creatureViewSection = new VBox();
+        creatureViewSection.setBackground(new Background(new BackgroundFill(Color.rgb(198, 179, 230), new CornerRadii(5), new Insets(0))));
+        creatureViewSection.setBorder(new Border(new BorderStroke(Color.rgb(163, 133, 214), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1), new Insets(0))));
+        creatureViewSection.setAlignment(Pos.TOP_CENTER);
+            Label creatureViewLabel = new Label("Creature list");
+            creatureViewLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
+            creatureViewLabel.setAlignment(Pos.BOTTOM_CENTER);
+            creatureViewHeader = new VBox(creatureViewLabel);
+            creatureViewHeader.setBackground(new Background(new BackgroundFill(Color.rgb(130, 87, 199), new CornerRadii(5), new Insets(-2))));
+            creatureViewHeader.setBorder(new Border(new BorderStroke(Color.rgb(57, 32, 97), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(2), new Insets(-2))));
+            creatureViewHeader.prefWidthProperty().bind(creatureViewSection.widthProperty());
+            creatureViewHeader.setPrefHeight(50);
+            creatureViewHeader.setPadding(new Insets(2, 10, 2, 10));
+        creatureViewSection.getChildren().add(creatureViewHeader);
+            creatureListPropertiesBox = new HBox();
+            creatureListPropertiesBox.prefWidthProperty().bind(creatureViewSection.widthProperty());
+            creatureListPropertiesBox.setPadding(new Insets(5, 10, 5, 10));
+                        Label sortingLabel = new Label("Sort by:");
+                        sortingLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+                        sortingChoiceBox = new ChoiceBox<>();
+                        sortingChoiceBox.getItems().addAll(Atributes.values());
+                        sortingChoiceBox.setValue(Atributes.Name);
+                        MyChoiceBoxSkin<Atributes> sortingChoiceBoxSkin = new MyChoiceBoxSkin<Atributes>(sortingChoiceBox, new AtributesConverter());
+                        sortingChoiceBoxSkin.setBackgroundColorField(MyColors.iceBlue);
+                        sortingChoiceBoxSkin.setBorderColorField(MyColors.verdrigis);
+                        sortingChoiceBoxSkin.setCellSize(30);
+                        sortingChoiceBoxSkin.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 14));
+                        sortingChoiceBox.setSkin(sortingChoiceBoxSkin);
+                        sortingChoiceBox.setMinHeight(USE_PREF_SIZE);
+                        sortingChoiceBox.setMaxHeight(USE_PREF_SIZE);
+                        sortingChoiceBox.prefHeightProperty().bind(Bindings.when(sortingChoiceBox.showingProperty()).then(100).otherwise(35));
+                        sortingKind = new SimpleObjectProperty<>();
+                        sortingKind.bind(sortingChoiceBox.valueProperty());
+                    creatureChoiceSortingBox = new HBox(sortingLabel, sortingChoiceBox);
+                    creatureChoiceSortingBox.setSpacing(15);
+                        sortButton = new Button("Sort");
+                        sortButton.setPrefHeight(30);
+                        sortButton.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 15));
+                        sortButton.setBackground(new Background(new BackgroundFill(MyColors.iceBlue, new CornerRadii(12), sortButton.getInsets())));
+                        sortButton.setBorder(new Border(new BorderStroke(MyColors.verdrigis, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+                        sortButton.setOnMouseClicked(e -> updateCreatureList());
+                        sortOrderCheckBox = new CheckBox();
+                        Polygon normalOrderArrow = new Polygon(5, 12.5, 15, 22.5, 25, 12.5);
+                        normalOrderArrow.setFill(MyColors.verdrigis);
+                        Pane normalOrderPane = new Pane(normalOrderArrow);
+                        normalOrderPane.setBackground(new Background(new BackgroundFill(MyColors.iceBlue, new CornerRadii(12), normalOrderPane.getInsets())));
+                        normalOrderPane.setBorder(new Border(new BorderStroke(MyColors.verdrigis, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+                        normalOrderPane.setMinHeight(30);
+                        normalOrderPane.setMinWidth(30);
+                        Polygon reverseOrderArrow = new Polygon(5, 17.5, 15, 7.5, 25, 17.5);
+                        reverseOrderArrow.setFill(MyColors.verdrigis);
+                        Pane reversOrderPane = new Pane(reverseOrderArrow);
+                        reversOrderPane.setBackground(new Background(new BackgroundFill(MyColors.iceBlue, new CornerRadii(12), reversOrderPane.getInsets())));
+                        reversOrderPane.setBorder(new Border(new BorderStroke(MyColors.verdrigis, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+                        reversOrderPane.setMinHeight(30);
+                        reversOrderPane.setMinWidth(30);
+                        sortOrderCheckBox.setSkin(new TwoFacedCheckBox(sortOrderCheckBox, normalOrderPane, reversOrderPane, false));
+                        inverseSort = new SimpleBooleanProperty();
+                        inverseSort.bind(sortOrderCheckBox.selectedProperty());
+                        inverseSort.addListener((p, ov, nv) -> updateCreatureList());
+                    creatureSortButtonBox = new HBox(sortButton, sortOrderCheckBox);
+                    creatureSortButtonBox.setSpacing(10);
+                creatureListSortingBox = new VBox(creatureChoiceSortingBox, creatureSortButtonBox);
+                creatureListSortingBox.prefWidthProperty().bind(creatureListPropertiesBox.widthProperty().multiply(0.5));
+                        Label filteringLabel = new Label("Filter on:");
+                        filteringLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+                        filteringChoiceBox = new ChoiceBox<>();
+                        filteringChoiceBox.getItems().addAll(Atributes.values());
+                        filteringChoiceBox.setValue(Atributes.Name);
+                        MyChoiceBoxSkin<Atributes> filteringChoiceBoxSkin = new MyChoiceBoxSkin<Atributes>(filteringChoiceBox, new AtributesConverter());
+                        filteringChoiceBoxSkin.setBackgroundColorField(MyColors.iceBlue);
+                        filteringChoiceBoxSkin.setBorderColorField(MyColors.verdrigis);
+                        filteringChoiceBoxSkin.setCellSize(30);
+                        filteringChoiceBoxSkin.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 14));
+                        filteringChoiceBox.setSkin(filteringChoiceBoxSkin);
+                        filteringChoiceBox.setMinHeight(USE_PREF_SIZE);
+                        filteringChoiceBox.setMaxHeight(USE_PREF_SIZE);
+                        filteringChoiceBox.prefHeightProperty().bind(Bindings.when(filteringChoiceBox.showingProperty()).then(100).otherwise(35));
+                        filteringKind = new SimpleObjectProperty<>();
+                        filteringKind.bind(filteringChoiceBox.valueProperty());
+                        filteringKind.addListener((p, ov, nv) -> updateFilterSettingDisplay(nv));
+                    creatureChoiceFilteringBox = new HBox(filteringLabel, filteringChoiceBox);
+                    creatureChoiceFilteringBox.setSpacing(10);
+                        filterLabel = new Label();
+                        filterLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 17));
+                        filterLabel.textProperty().bind(Bindings.when(filteringKind.isEqualTo(Atributes.Name)).then("Name contains").otherwise(Bindings.createStringBinding(() -> filteringKind.get().toString(), filteringKind)));
+                        nameSearchField = new TextField("");
+                        nameSearchField.setBackground(new Background(new BackgroundFill(MyColors.iceBlue, new CornerRadii(9), reversOrderPane.getInsets())));
+                        nameSearchField.setBorder(new Border(new BorderStroke(MyColors.verdrigis, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+                        nameSearchField.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 15));
+                        nameSearchField.setMaxWidth(90);
+                        searchText = new SimpleStringProperty("");
+                        searchText.bind(nameSearchField.textProperty());
+                        comparatorChoiceBox = new ChoiceBox<>();
+                        comparatorChoiceBox.getItems().addAll(FilterComparators.values());
+                        MyChoiceBoxSkin<FilterComparators> comparatorChoiceBoxSkin = new MyChoiceBoxSkin<FilterComparators>(comparatorChoiceBox, new FilterComparatorsConverter());
+                        comparatorChoiceBoxSkin.setBackgroundColorField(MyColors.iceBlue);
+                        comparatorChoiceBoxSkin.setBorderColorField(MyColors.verdrigis);
+                        comparatorChoiceBoxSkin.setCellSize(30);
+                        comparatorChoiceBox.setSkin(comparatorChoiceBoxSkin);
+                        comparatorChoiceBox.setPrefWidth(70);
+                        comparatorChoiceBox.setMinHeight(USE_PREF_SIZE);
+                        comparatorChoiceBox.setMaxHeight(USE_PREF_SIZE);
+                        comparatorChoiceBox.prefHeightProperty().bind(Bindings.when(comparatorChoiceBox.showingProperty()).then(95).otherwise(35));
+                        filterComparator = new SimpleObjectProperty<>();
+                        filterComparator.bind(comparatorChoiceBox.valueProperty());
+                        compareToField = new TextField("0");
+                        compareToField.setBackground(new Background(new BackgroundFill(MyColors.iceBlue, new CornerRadii(9), reversOrderPane.getInsets())));
+                        compareToField.setBorder(new Border(new BorderStroke(MyColors.verdrigis, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+                        compareToField.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 15));
+                        compareToField.setMaxWidth(60);
+                        compareToField.setPrefHeight(35);
+                        filterAmount = new SimpleDoubleProperty(0);
+                        filterAmount.bind(Bindings.createDoubleBinding(() -> {
+                            if (compareToField.getText().equals("")) {
+                                return 0d;
+                            } else {
+                                try {
+                                    return Double.parseDouble(compareToField.getText());
+                                } catch (NullPointerException | NumberFormatException e) {
+                                    return null;
+                                }
+                            }
+                        }, compareToField.textProperty()));
+                    creatureListFilterSettingBox = new HBox();
+                    creatureListFilterSettingBox.setSpacing(10);
+                        filterButton = new Button("Filter");
+                        filterButton.setPrefHeight(30);
+                        filterButton.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 15));
+                        filterButton.setBackground(new Background(new BackgroundFill(MyColors.iceBlue, new CornerRadii(12), sortButton.getInsets())));
+                        filterButton.setBorder(new Border(new BorderStroke(MyColors.verdrigis, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+                        filterButton.setOnMouseClicked(e -> updateCreatureList());
+                    creatureFilterButtonBox = new HBox(filterButton);
+                creatureListFilteringBox = new VBox(creatureChoiceFilteringBox, creatureListFilterSettingBox, creatureFilterButtonBox);
+                creatureListFilteringBox.prefWidthProperty().bind(creatureListPropertiesBox.widthProperty().multiply(0.5));
+            creatureListPropertiesBox.getChildren().addAll(creatureListSortingBox, creatureListFilteringBox);
+        creatureViewSection.getChildren().add(creatureListPropertiesBox);
+            creatureListBox = new VBox();
+            creatureListScrollPane = new ScrollPane(creatureListBox);
+            creatureListBox.setBackground(new Background(new BackgroundFill(Color.rgb(198, 179, 230), new CornerRadii(0), new Insets(0))));
+            creatureListBox.minHeightProperty().bind(creatureListScrollPane.heightProperty());
+            creatureListScrollPane.setFitToWidth(true);
+            creatureListScrollPane.prefWidthProperty().bind(creatureViewSection.widthProperty());
+            creatureListScrollPane.setMinHeight(USE_PREF_SIZE);
+            creatureListScrollPane.minHeightProperty().bind(Bindings.min(creaturesAmount.multiply(50), 400));
+            creatureListScrollPane.setBackground(new Background(new BackgroundFill(Color.rgb(198, 179, 230), new CornerRadii(0), new Insets(0))));
+        creatureViewSection.getChildren().add(creatureListScrollPane);
+        this.getChildren().add(creatureViewSection);
+    }
+    private void updateCreatureList() {
+        this.creatureList = creatures.stream().filter(c -> filteringKind.get() == null || filteringKind.get().compare(c, filterComparator.get(), filterAmount.get())).filter(c -> filteringKind.get() == null || filteringKind.get().contains(c, searchText.get())).sorted(sortingKind.get().getCreatureComparator(inverseSort.get())).collect(Collectors.toList());
+        for (int i=0; i<Math.max(creatureList.size(), creatureDisplays.size()); i++) {
+            if (i<creatureList.size() && i<creatureDisplaysShown.get()) {
+                creatureDisplays.get(i).setCreature(creatureList.get(i));
+            } else if (i<creatureList.size() && i<creatureDisplays.size()) {
+                creatureDisplays.get(i).setCreature(creatureList.get(i));
+                creatureListBox.getChildren().add(creatureDisplays.get(i));
+            } else if (i<creatureList.size()) {
+                CreatureInfoDisplay display = new CreatureInfoDisplay(creatureList.get(i));
+                display.setPrefHeight(50);
+                creatureDisplays.add(display);
+                creatureListBox.getChildren().add(display);
+            } else {
+                creatureListBox.getChildren().remove(creatureDisplays.get(i));
+            }
+        }
+        creatureDisplaysShown.set(creatureList.size());
+    }
+
+    private void updateFilterSettingDisplay(Atributes a) {
+        creatureListFilterSettingBox.getChildren().removeAll(filterLabel, nameSearchField, comparatorChoiceBox, compareToField);
+        if (a == null) {
+            return;
+        }
+        if (a == Atributes.Name) {
+            creatureListFilterSettingBox.getChildren().addAll(filterLabel, nameSearchField);
+        } else {
+            creatureListFilterSettingBox.getChildren().addAll(filterLabel, comparatorChoiceBox, compareToField);
+        }
     }
 
     private void updateTypeLeaderBoard() {
@@ -558,6 +782,19 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
         }
     }
 
+    private void addCreatureToList(Creature c) {
+        if (creatureDisplaysShown.get()>=creatureDisplays.size()) {
+            CreatureInfoDisplay display = new CreatureInfoDisplay(c);
+            creatureDisplays.add(display);
+            display.setPrefHeight(50);
+            creatureListBox.getChildren().add(display);
+        } else {
+            creatureDisplays.get(creatureDisplaysShown.get()).setCreature(c);
+            creatureListBox.getChildren().add(creatureDisplays.get(creatureDisplaysShown.get()));
+        }
+        creatureDisplaysShown.set(creatureDisplaysShown.get()+1);
+    }
+
     @Override
     public void onCreatureCreate(Creature c) {
         creaturesAmount.set(creaturesAmount.get()+1);
@@ -592,6 +829,8 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
             typeOffenseAmount.get(t).set(typeOffenseAmount.get(t).get()+c.getOffenseMap().get(t));
         }
         updateTypeLeaderBoard();
+        //creature list
+        addCreatureToList(c);
     }
 
     private void updateCreatureEngineerBox(boolean visible) {
@@ -717,5 +956,130 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
     @Override
     public void onProteinChangeFinished() {
         updateTypeLeaderBoard();
+    }
+}
+
+enum FilterComparators {
+    SMALLER, SMALLERQUALS, EQUALS, GREATEREQUALS, GREATER;
+    public boolean compare(double x, double v) {
+        switch(this) {
+            case SMALLER:
+                return x<v;
+            case SMALLERQUALS:
+                return x<=v;
+            case EQUALS:
+                return x==v; 
+            case GREATEREQUALS:
+                return x>=v;
+            case GREATER:
+                return x>v;
+            default:
+                return true;
+        }
+    }
+}
+
+enum Atributes {
+    Name, Age, Health, Energy, Kills, Children;
+    public Comparator<Creature> getCreatureComparator(boolean inverse) {
+        int multiplier = inverse? -1 : 1;
+        switch(this) {
+            case Name:
+                return (Creature c1, Creature c2) -> multiplier*(c1.getName().toLowerCase().compareTo(c2.getName().toLowerCase()));
+            case Age:
+                return (Creature c1, Creature c2) -> multiplier*(Integer.valueOf(c2.getAge()).compareTo(c1.getAge()));
+            case Energy:
+                return (Creature c1, Creature c2) -> multiplier*(Double.valueOf(c2.getEnergy()).compareTo(c1.getEnergy()));
+            case Health:
+                return (Creature c1, Creature c2) -> multiplier*(Double.valueOf(c2.getHealth()).compareTo(c1.getHealth()));
+            case Kills:
+                return (Creature c1, Creature c2) -> multiplier*(Integer.valueOf(c2.getKills()).compareTo(c1.getKills()));
+            case Children:
+                return (Creature c1, Creature c2) -> multiplier*(Integer.valueOf(c2.getChildrenAmount()).compareTo(c1.getChildrenAmount()));
+            default:
+                return (Creature c1, Creature c2) -> multiplier*(c1.getName().compareTo(c2.getName()));
+        }
+    }
+    public boolean compare(Creature c, FilterComparators comparator, Double v) {
+        if (v == null) {
+            return true;
+        }
+        switch(this) {
+            case Name:
+                return true;
+            case Age:
+                return comparator.compare(c.getAge(), v);
+            case Energy:
+                return comparator.compare(c.getEnergy(), v);
+            case Health:
+                return comparator.compare(c.getHealth(), v);
+            case Kills:
+                return comparator.compare(c.getKills(), v);
+            case Children:
+                return comparator.compare(c.getChildrenAmount(), v);
+            default:
+                return true;
+        }
+    }
+    public boolean contains(Creature c, String s) {
+        switch(this) {
+            case Name:
+                return c.getName().toLowerCase().contains(s.toLowerCase());
+            default:
+                return true;
+        }
+    }
+}
+
+class AtributesConverter extends StringConverter<Atributes> {
+
+    @Override
+    public String toString(Atributes object) {
+        return object.toString();
+    }
+
+    @Override
+    public Atributes fromString(String string) {
+        return Atributes.valueOf(string);
+    }
+    
+}
+
+class FilterComparatorsConverter extends StringConverter<FilterComparators> {
+
+    @Override
+    public String toString(FilterComparators object) {
+        switch (object) {
+            case SMALLER:
+                return "<";
+            case SMALLERQUALS:
+                return "<=";
+            case EQUALS:
+                return "="; 
+            case GREATEREQUALS:
+                return ">=";
+            case GREATER:
+                return ">";
+            default:
+                return "";
+        } 
+    }
+
+    @Override
+    public FilterComparators fromString(String string) {
+        switch (string) {
+            case "<":
+                return FilterComparators.SMALLER;
+            case "<=":
+                return FilterComparators.SMALLERQUALS;
+            case "=":
+                return FilterComparators.EQUALS; 
+            case ">=":
+                return FilterComparators.GREATEREQUALS;
+            case ">":
+                return FilterComparators.GREATER;
+            default:
+                return null;
+        } 
     }
 }

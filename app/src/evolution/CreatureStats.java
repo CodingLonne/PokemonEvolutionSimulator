@@ -127,11 +127,13 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         energyInfo.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
         ageInfo.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
         healthBar = new MyStatsBar(1);
-        healthBar.setColorScheme(MyColors.cherryBlossomPink, MyColors.folly);
+        healthBar.backgroundColorProperty().bind(Bindings.when(alive).then(MyColors.cherryBlossomPink).otherwise(MyColors.cherryBlossomPink.grayscale()));
+        healthBar.barColorProperty().bind(Bindings.when(alive).then(MyColors.folly).otherwise(MyColors.folly.grayscale()));
         healthBar.setPrefWidth(200);
         healthBar.setPrefHeight(30);
         energyBar = new MyStatsBar(1);
-        energyBar.setColorScheme(MyColors.lightGreen2, MyColors.SGBUSGreen);
+        energyBar.backgroundColorProperty().bind(Bindings.when(alive).then(MyColors.lightGreen2).otherwise(MyColors.lightGreen2.grayscale()));
+        energyBar.barColorProperty().bind(Bindings.when(alive).then(MyColors.SGBUSGreen).otherwise(MyColors.SGBUSGreen.grayscale()));
         energyBar.setPrefWidth(200);
         energyBar.setPrefHeight(30);
         HBox healthBox = new HBox(healthInfo, healthBar);

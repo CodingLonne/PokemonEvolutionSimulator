@@ -1,7 +1,11 @@
 package evolution.VisualElements;
 
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
@@ -16,12 +20,33 @@ import javafx.scene.shape.Rectangle;
 public class MyStatsBar extends Pane {
     private SimpleDoubleProperty progress;
     private Rectangle progressBar;
+    private SimpleObjectProperty<Color> backgroundColor;
+    private SimpleObjectProperty<Color> barColor;
     public MyStatsBar(double progress){
         this.progress = new SimpleDoubleProperty(progress);
         progressBar = new Rectangle(0, 0, this.getWidth(), this.getHeight());
         progressBar.heightProperty().bind(this.heightProperty());
         progressBar.widthProperty().bind(this.widthProperty().multiply(this.progress));
         this.getChildren().add(progressBar);
+        backgroundColor = new SimpleObjectProperty<Color>(Color.WHITE);
+        barColor = new SimpleObjectProperty<Color>(Color.BLACK);
+        setColorScheme(backgroundColor.get(), barColor.get());
+        backgroundColor.addListener(new ChangeListener<Color>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+                setColorScheme(backgroundColor.get(), barColor.get());
+            }
+            
+        });
+        barColor.addListener(new ChangeListener<Color>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+                setColorScheme(backgroundColor.get(), barColor.get());
+            }
+            
+        });
     }
     public MyStatsBar(DoubleBinding progress){
         this.progress = new SimpleDoubleProperty();
@@ -30,6 +55,25 @@ public class MyStatsBar extends Pane {
         progressBar.heightProperty().bind(this.heightProperty());
         progressBar.widthProperty().bind(this.widthProperty().multiply(this.progress));
         this.getChildren().add(progressBar);
+        backgroundColor = new SimpleObjectProperty<Color>(Color.WHITE);
+        barColor = new SimpleObjectProperty<Color>(Color.BLACK);
+        setColorScheme(backgroundColor.get(), barColor.get());
+        backgroundColor.addListener(new ChangeListener<Color>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+                setColorScheme(backgroundColor.get(), barColor.get());
+            }
+            
+        });
+        barColor.addListener(new ChangeListener<Color>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+                setColorScheme(backgroundColor.get(), barColor.get());
+            }
+            
+        });
     }
     public Rectangle getProgressBar() {
         return progressBar;
@@ -50,5 +94,29 @@ public class MyStatsBar extends Pane {
         progressBar.setArcWidth(10);
         progressBar.setArcHeight(10);
         progressBar.setStroke(Color.BLACK);
+    }
+
+    public Color getBackgroundColor() {
+        return backgroundColor.get();
+    }
+
+    public Color getBarColor() {
+        return barColor.get();
+    }
+
+    public void setBackgroundColor(Color c) {
+        backgroundColor.set(c);
+    }
+
+    public void setBarColor(Color c) {
+        barColor.set(c);
+    }
+
+    public ObjectProperty<Color> backgroundColorProperty() {
+        return backgroundColor;
+    }
+
+    public ObjectProperty<Color> barColorProperty() {
+        return barColor;
     }
 }

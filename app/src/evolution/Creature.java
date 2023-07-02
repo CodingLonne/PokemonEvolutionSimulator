@@ -8,6 +8,7 @@ import evolution.Relationship.Relation;
 import evolution.World.CreatureClickListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -46,7 +47,9 @@ public class Creature implements proteinChangeListener{
     private LinkedList<Creature> loves;
     private LinkedList<Creature> enemies;
     private LinkedList<Creature> children;
+    private SimpleIntegerProperty childrenAmount;
     private HashMap<Creature, Relation> relationships;
+    private SimpleIntegerProperty kills;
 
     private HashMap<Type, Integer> proteinDefense;
     private HashMap<Type, Integer> proteinOffense;
@@ -76,6 +79,8 @@ public class Creature implements proteinChangeListener{
         loves = new LinkedList<Creature>();
         enemies = new LinkedList<Creature>();
         children = new LinkedList<Creature>();
+        childrenAmount = new SimpleIntegerProperty(0);
+        kills = new SimpleIntegerProperty(0);
 
         encoder.addListener(this);
         creatureClickListeners = new LinkedList<>();
@@ -84,6 +89,7 @@ public class Creature implements proteinChangeListener{
         Random random = new Random();
         this.health.set(random.nextDouble(maxHealth.get()));
         this.energy.set(random.nextDouble(maxEnergy.get()));
+        this.age.set(random.nextInt(12));
     }
 
     Creature(World world, double x, double y, Dna dna, proteinEncodingManager encoder) {
@@ -188,6 +194,14 @@ public class Creature implements proteinChangeListener{
         return children;
     }
 
+    public int getChildrenAmount() {
+        return childrenAmount.get();
+    }
+
+    public int getKills() {
+        return kills.get();
+    }
+
     public Creature getMother() {
         return mother;
     }
@@ -265,6 +279,11 @@ public class Creature implements proteinChangeListener{
 
     public void addChild(Creature c) {
         children.add(c);
+        childrenAmount.set(childrenAmount.get()+1);
+    }
+
+    public void addKill() {
+        kills.set(kills.get()+1);
     }
 
     //property getters
@@ -318,6 +337,14 @@ public class Creature implements proteinChangeListener{
 
     public SimpleBooleanProperty sleepingProperty() {
         return isSleeping;
+    }
+
+    public ReadOnlyIntegerProperty childrenAmountProperty() {
+        return childrenAmount;
+    }
+
+    public ReadOnlyIntegerProperty killProperty() {
+        return kills;
     }
 
     //listeners

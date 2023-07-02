@@ -2,8 +2,10 @@ package evolution.VisualElements;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
@@ -27,18 +29,23 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.util.StringConverter;
 
-public class MyChoiceBoxSkin extends SkinBase<ChoiceBox<String>>{
+public class MyChoiceBoxSkin<T> extends SkinBase<ChoiceBox<T>>{
     private Label label;
     private VBox background;
-    private ListView<String> selectTable;
+    private ListView<T> selectTable;
     private SimpleBooleanProperty isSelecting;
 
     private Color borderColorField = Color.BLACK;
     private Color backgroundColorField = Color.WHITE;
     private SimpleDoubleProperty cellSize;
-    public MyChoiceBoxSkin(ChoiceBox<String> control) {
+    private StringConverter<T> stringConverter;
+    private ObjectProperty<Font> font;
+    public MyChoiceBoxSkin(ChoiceBox<T> control, StringConverter<T> converter) {
         super(control);
+        stringConverter = converter;
+        font = new SimpleObjectProperty<Font>(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 15));
         control.setBackground(null);
         isSelecting = new SimpleBooleanProperty(false);
         isSelecting.addListener(new ChangeListener<Boolean>() {
@@ -60,10 +67,10 @@ public class MyChoiceBoxSkin extends SkinBase<ChoiceBox<String>>{
             if (control.getValue() == null) {
                 return "-";
             }
-            return control.getValue();
+            return stringConverter.toString(control.getValue());
         }, control.valueProperty()));
         label.setTextFill(Color.BLACK);
-        label.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 15));
+        label.fontProperty().bind(font);
         label.setMinSize(Label.USE_PREF_SIZE, Label.USE_PREF_SIZE);
         background = new VBox(label);
         background.setAlignment(Pos.CENTER);
@@ -90,8 +97,8 @@ public class MyChoiceBoxSkin extends SkinBase<ChoiceBox<String>>{
         });
         cellSize = new SimpleDoubleProperty(35);
         selectTable.setCellFactory(x -> {
-            ChoiceBoxListCell<String> choiceBoxListCell = new ChoiceBoxListCell<String>(x.getItems());
-            choiceBoxListCell.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 15));
+            ChoiceBoxListCell<T> choiceBoxListCell = new ChoiceBoxListCell<T>(converter, x.getItems());
+            choiceBoxListCell.fontProperty().bind(font);
             choiceBoxListCell.setBackground(new Background(new BackgroundFill(backgroundColorField, new CornerRadii(12), new Insets(0))));
             choiceBoxListCell.setBorder(new Border(new BorderStroke(borderColorField, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(1))));
             choiceBoxListCell.setTextFill(Color.BLACK);
@@ -131,6 +138,10 @@ public class MyChoiceBoxSkin extends SkinBase<ChoiceBox<String>>{
         return cellSize.get();
     }
 
+    public Font getFont() {
+        return font.get();
+    }
+
     //setters
     public void setBackgroundColorField(Color c) {
         backgroundColorField = c;
@@ -145,10 +156,18 @@ public class MyChoiceBoxSkin extends SkinBase<ChoiceBox<String>>{
     public void setCellSize(double s) {
         cellSize.set(s);
     }
+    
+    public void setFont(Font f) {
+        font.set(f);
+    }
 
     //properties
     public DoubleProperty cellSizeProperty() {
         return cellSize;
+    }
+
+    public ObjectProperty<Font> fontProperty() {
+        return font;
     }
     
 }
