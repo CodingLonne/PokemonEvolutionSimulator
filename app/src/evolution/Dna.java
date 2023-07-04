@@ -42,6 +42,10 @@ public class Dna {
     public void update() {
         leftChromosome.update();
         rightChromosome.update();
+        for (Type t : Type.allTypes()) {
+            proteinDefense.put(t, leftChromosome.getDefenseMap().get(t)+rightChromosome.getDefenseMap().get(t));
+            proteinOffense.put(t, leftChromosome.getOffenseMap().get(t)+rightChromosome.getOffenseMap().get(t));
+        }
     }
 
     //static functions

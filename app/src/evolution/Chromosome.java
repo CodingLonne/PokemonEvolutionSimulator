@@ -21,7 +21,7 @@ public class Chromosome {
 
     private proteinEncodingManager encoder;
 
-    Chromosome(String dna, proteinEncodingManager encoder) {
+    public Chromosome(String dna, proteinEncodingManager encoder) {
         this.dna = dna.substring(0, Math.min(maxLenght, dna.length()));
         this.encoder = encoder;
         encode();

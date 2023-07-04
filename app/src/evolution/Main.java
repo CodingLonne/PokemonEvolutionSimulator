@@ -10,7 +10,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import evolution.VisualElements.MyColors;
+import evolution.Visual.BreedingStats;
+import evolution.Visual.CreatureStats;
+import evolution.Visual.CreaturesDisplay;
+import evolution.Visual.ScreenManager;
+import evolution.Visual.TypeStatsDisplay;
+import evolution.Visual.VisualWorld;
+import evolution.Visual.VisualElements.MyColors;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -24,7 +30,9 @@ public class Main extends Application{
         //logic
         NameGenerator nameGranter = new NameGenerator();
         proteinEncodingManager encoder = new proteinEncodingManager();
-        World mainLogic = new World(600, encoder);
+        BreedingSettings breedingSettings = new BreedingSettings();
+        FightingSettings fightingSettings = new FightingSettings();
+        World mainLogic = new World(600, encoder, breedingSettings, fightingSettings);
         //grid
         BorderPane wholeScreen = new BorderPane();
         //different screens
@@ -61,15 +69,13 @@ public class Main extends Application{
                     creatureStats.setPadding(new Insets(5, 30, 5, 20));
                     creatureStats.setPrefWidth(550);
 
-                    Pane breedingSettings = new Pane();
-                    breedingSettings.setBackground(new Background(new BackgroundFill(MyColors.wheat, null, null)));
-                    breedingSettings.setPadding(new Insets(5, 30, 5, 20));
-                    breedingSettings.setPrefWidth(550);
+                    BreedingStats breedingSettingsDisplay = new BreedingStats(breedingSettings);
+                    breedingSettingsDisplay.setPrefWidth(550);
 
-                    Pane fightingSettings = new Pane();
-                    fightingSettings.setBackground(new Background(new BackgroundFill(MyColors.wheat, null, null)));
-                    fightingSettings.setPadding(new Insets(5, 30, 5, 20));
-                    fightingSettings.setPrefWidth(550);
+                    Pane fightingSettingsDisplay = new Pane();
+                    fightingSettingsDisplay.setBackground(new Background(new BackgroundFill(MyColors.wheat, null, null)));
+                    fightingSettingsDisplay.setPadding(new Insets(5, 30, 5, 20));
+                    fightingSettingsDisplay.setPrefWidth(550);
 
                 scroller.setContent(typeStats);
             infoscreens.getChildren().add(scroller);
@@ -79,7 +85,7 @@ public class Main extends Application{
         
         //setup swappers
         ScreenManager screenSwapper = new ScreenManager(scroller, switchPane, 5, 
-                                                        new Pane[]{typeStats, creatureOverview, creatureStats, breedingSettings, fightingSettings}, 
+                                                        new Pane[]{typeStats, creatureOverview, creatureStats, breedingSettingsDisplay, fightingSettingsDisplay}, 
                                                         new String[]{"types", "creatures", "unnamed", "breeding", "fighting"});
         Scene scene = new Scene(wholeScreen);
 
@@ -92,6 +98,9 @@ public class Main extends Application{
         mainLogic.addCreatureClickListener(creatureStats);
         mainLogic.addCreatureClickListener(screenSwapper);
         creatureOverview.addCreatureBiome(mainLogic);
+        encoder.addListener(creatureStats);
+        encoder.addListener(typeStats);
+        encoder.addListener(creatureOverview);
 
         //initialize stuff when needed
         mainLogic.initialize();

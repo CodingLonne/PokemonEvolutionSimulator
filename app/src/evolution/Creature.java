@@ -15,11 +15,11 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 public class Creature implements proteinChangeListener{
-    private final static double defaultSize = 16;
-    private final static double defaultSpeed = 2;
-    private final static double defaultSense = 100;
-    private final static double defaultMaxHealth = 100;
-    private final static double defaultMaxEnergy = 200;
+    public final static double defaultSize = 16;
+    public final static double defaultSpeed = 2;
+    public final static double defaultSense = 100;
+    public final static double defaultMaxHealth = 100;
+    public final static double defaultMaxEnergy = 200;
     private SimpleDoubleProperty maxHealth;
     private SimpleDoubleProperty maxEnergy;
 
@@ -56,7 +56,7 @@ public class Creature implements proteinChangeListener{
 
     private LinkedList<CreatureClickListener> creatureClickListeners;
 
-    Creature(World world, double x, double y, Dna dna, double health, double energy, proteinEncodingManager encoder) {
+    public Creature(World world, double x, double y, Dna dna, double health, double energy, proteinEncodingManager encoder) {
         xProperty = new SimpleDoubleProperty(x);
         yProperty = new SimpleDoubleProperty(y);
         this.dna = dna;
@@ -92,11 +92,11 @@ public class Creature implements proteinChangeListener{
         this.age.set(random.nextInt(12));
     }
 
-    Creature(World world, double x, double y, Dna dna, proteinEncodingManager encoder) {
+    public Creature(World world, double x, double y, Dna dna, proteinEncodingManager encoder) {
         this(world, x, y, dna, defaultMaxHealth, defaultMaxEnergy, encoder);
     }
 
-    Creature(World world, double x, double y, proteinEncodingManager encoder) {
+    public Creature(World world, double x, double y, proteinEncodingManager encoder) {
         this(world, x, y, Dna.randomDna(encoder), defaultMaxHealth, defaultMaxEnergy, encoder);
     }
 

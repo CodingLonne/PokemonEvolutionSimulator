@@ -8,37 +8,41 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 public class World implements CreaturePlaceField {
-    SimpleDoubleProperty worldSize;
+    private SimpleDoubleProperty worldSize;
 
-    LinkedList<Creature> allCreatures;
-    LinkedList<CreatureListener> creatureListeners;
-    LinkedList<WorldListener> worldListeners;
-    LinkedList<CreatureClickListener> creatureClickListeners;
+    private LinkedList<Creature> allCreatures;
+    private LinkedList<CreatureListener> creatureListeners;
+    private LinkedList<WorldListener> worldListeners;
+    private LinkedList<CreatureClickListener> creatureClickListeners;
 
-    proteinEncodingManager geneEncoder;
+    private proteinEncodingManager geneEncoder;
+    private BreedingSettings breedingSettings;
+    private FightingSettings fightingSettings;
 
-    SimpleIntegerProperty day;
+    private SimpleIntegerProperty day;
 
-    interface CreatureListener{
+    public interface CreatureListener{
         void onCreatureCreate(Creature c);
         void onCreatureDelete(Creature c);
         void onCreatureUpdate(Creature c);
     }
-    interface WorldListener{
+    public interface WorldListener{
         void setupNeededConnections(SimpleIntegerProperty day, SimpleDoubleProperty worldSize);
     }
-    interface CreatureClickListener{
+    public interface CreatureClickListener{
         void OnCreatureClick(Creature c);
     }
 
-    World(double size, proteinEncodingManager encoder) {
-        worldSize = new SimpleDoubleProperty(size);
-        allCreatures = new LinkedList<>();
-        creatureListeners = new LinkedList<>();
-        worldListeners = new LinkedList<>();
-        creatureClickListeners = new LinkedList<>();
-        geneEncoder = encoder;
-        day = new SimpleIntegerProperty(0);
+    public World(double size, proteinEncodingManager encoder, BreedingSettings breedingSettings, FightingSettings fightingSettings) {
+        this.worldSize = new SimpleDoubleProperty(size);
+        this.allCreatures = new LinkedList<>();
+        this.creatureListeners = new LinkedList<>();
+        this.worldListeners = new LinkedList<>();
+        this.creatureClickListeners = new LinkedList<>();
+        this.geneEncoder = encoder;
+        this.breedingSettings = breedingSettings;
+        this.fightingSettings = fightingSettings;
+        this.day = new SimpleIntegerProperty(0);
     }
 
     public void initialize() {
