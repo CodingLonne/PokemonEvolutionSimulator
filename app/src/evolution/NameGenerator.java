@@ -3,36 +3,33 @@ package evolution;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import evolution.World.CreatureListener;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class NameGenerator implements CreatureListener{
     File file;
     boolean giveNames;
-    LinkedList<String> allNames;
-    LinkedList<String> availableNames;
+    List<String> allNames;
+    List<String> availableNames;
     int amountOfNamesGiven;
+    StringProperty currentFile;
     
-    @SuppressWarnings("unchecked")
     NameGenerator() {
         giveNames = true;
         allNames = new LinkedList<>();
+        availableNames = new LinkedList<>();
         amountOfNamesGiven = 0;
-        try{
-            file = new File("names.txt");
-            Scanner myReader = new Scanner(file);
-            while (myReader.hasNextLine()) {
-                String data = myReader.nextLine();
-                allNames.add(data);
-            }
-            myReader.close();
-            availableNames = (LinkedList<String>) allNames.clone();
-            
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        currentFile = new SimpleStringProperty();
+        boolean succes = setNameFile("names.txt");
+        if (!succes) {
+            currentFile.set("");
         }
-
     }
 
     public int determineIndex(int bottom, int top, String dnaString, int dnaIndex) {
@@ -75,5 +72,40 @@ public class NameGenerator implements CreatureListener{
     @Override
     public void onCreatureUpdate(Creature c) {
         return;
+    }
+
+    //getters
+    public String getNameFile() {
+        return currentFile.get();
+    }
+
+    //setters
+    public boolean setNameFile(String filename) {
+        List<String> oldNames = new LinkedList<>(allNames);
+        List<String> newNames = new LinkedList<>();
+        try {
+            file = new File("names/" + filename);
+            Scanner myReader = new Scanner(file);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                newNames.add(data);
+            }
+            myReader.close();
+            currentFile.set(filename);
+            
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+        List<String> takenNames = oldNames.stream().filter(x -> !availableNames.contains(x)).collect(Collectors.toList());
+        List<String> newAvailableList = newNames.stream().filter(x -> !takenNames.contains(x)).collect(Collectors.toList());
+        this.allNames = newNames;
+        this.availableNames = newAvailableList;
+        return true;
+    }
+
+    //properties
+    public ReadOnlyStringProperty nameFileProperty() {
+        return currentFile;
     }
 }

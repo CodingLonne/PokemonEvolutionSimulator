@@ -630,7 +630,15 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
                     creatureChoiceFilteringBox.setSpacing(10);
                         filterLabel = new Label();
                         filterLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 17));
-                        filterLabel.textProperty().bind(Bindings.when(filteringKind.isEqualTo(Atributes.Name)).then("Name contains").otherwise(Bindings.createStringBinding(() -> filteringKind.get().toString(), filteringKind)));
+                        filterLabel.textProperty().bind(Bindings.createStringBinding(() -> {
+                            if (filteringKind.get() == null) {
+                                return "";
+                            } else if (filteringKind.get() == Atributes.Name) {
+                                return "Name contains";
+                            } else {
+                                return filteringKind.get().toString();
+                            }
+                        }, filteringKind));
                         nameSearchField = new TextField("");
                         nameSearchField.setBackground(new Background(new BackgroundFill(MyColors.iceBlue, new CornerRadii(9), reversOrderPane.getInsets())));
                         nameSearchField.setBorder(new Border(new BorderStroke(MyColors.verdrigis, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
@@ -716,7 +724,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
 
     private void updateFilterSettingDisplay(Atributes a) {
         creatureListFilterSettingBox.getChildren().removeAll(filterLabel, nameSearchField, comparatorChoiceBox, compareToField);
-        if (a == null) {
+        if (a == null || a == Atributes.Nothing) {
             return;
         }
         if (a == Atributes.Name) {
@@ -994,10 +1002,12 @@ enum FilterComparators {
 }
 
 enum Atributes {
-    Name, Age, Health, Energy, Kills, Children;
+    Nothing, Name, Age, Health, Energy, Kills, Children;
     public Comparator<Creature> getCreatureComparator(boolean inverse) {
         int multiplier = inverse? -1 : 1;
         switch(this) {
+            case Nothing:
+                return (Creature c1, Creature c2) -> 0;
             case Name:
                 return (Creature c1, Creature c2) -> multiplier*(c1.getName().toLowerCase().compareTo(c2.getName().toLowerCase()));
             case Age:
@@ -1019,6 +1029,8 @@ enum Atributes {
             return true;
         }
         switch(this) {
+            case Nothing:
+                return true;
             case Name:
                 return true;
             case Age:

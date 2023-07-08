@@ -69,7 +69,7 @@ public class Main extends Application{
                     creatureStats.setPadding(new Insets(5, 30, 5, 20));
                     creatureStats.setPrefWidth(550);
 
-                    BreedingStats breedingSettingsDisplay = new BreedingStats(breedingSettings);
+                    BreedingStats breedingSettingsDisplay = new BreedingStats(breedingSettings, nameGranter);
                     breedingSettingsDisplay.setPrefWidth(550);
 
                     Pane fightingSettingsDisplay = new Pane();

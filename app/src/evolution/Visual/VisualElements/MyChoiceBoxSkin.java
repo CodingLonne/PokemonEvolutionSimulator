@@ -86,7 +86,16 @@ public class MyChoiceBoxSkin<T> extends SkinBase<ChoiceBox<T>>{
         });
         this.getChildren().add(background);
         selectTable = new ListView<>(control.getItems());
+        selectTable.getFocusModel().focus(selectTable.getItems().indexOf(control.getValue()));
         control.valueProperty().bind(selectTable.getSelectionModel().selectedItemProperty());
+        control.valueProperty().addListener(new ChangeListener<T>() {
+
+            @Override
+            public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
+                selectTable.getFocusModel().focus(selectTable.getItems().indexOf(newValue));
+            }
+            
+        });
         selectTable.setOnMouseClicked(new EventHandler<Event>() {
 
             @Override
