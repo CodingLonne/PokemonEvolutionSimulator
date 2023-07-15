@@ -9,6 +9,7 @@ import evolution.Creature;
 import evolution.Type;
 import evolution.proteinEncodingManager;
 import evolution.Visual.ScreenManager.screenManagerOwned;
+import evolution.Visual.VisualElements.CreatureLabel;
 import evolution.Visual.VisualElements.HeartShape;
 import evolution.Visual.VisualElements.MyColors;
 import evolution.Visual.VisualElements.MyStatsBar;
@@ -645,45 +646,5 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
                         typeOverviewSection.getHeight()+
                         familyTreeSection.getHeight()+
                         childrenListSection.getHeight())*1.2);
-    }
-}
-
-class CreatureLabel extends Label{
-    Creature creature;
-    SimpleBooleanProperty alive;
-    CreatureLabel(Creature c) {
-        super();
-        alive = new SimpleBooleanProperty(true);
-        setCreature(c);
-    }
-    CreatureLabel(String s, Creature c) {
-        super(s);
-        alive = new SimpleBooleanProperty();
-        setCreature(c);
-    }
-    public Creature getCreature() {
-        return creature;
-    }
-    public void setCreature(Creature c) {
-        this.textProperty().unbind();
-        this.alive.unbind();
-        this.textFillProperty().unbind();
-        this.alive.set(false);
-        creature = c;
-        if (c != null) {
-            this.textProperty().bind(c.nameProperty().concat(Bindings.when(alive).then("").otherwise("☠")));
-            this.textFillProperty().bind(Bindings.when(alive).then(c.mostProminentType().getColor()).otherwise(c.mostProminentType().getColor().desaturate()));
-            alive.bind(c.aliveProperty());
-        } else {
-            this.setText("-");
-            this.setTextFill(Color.BLACK);
-        }
-    }
-    public SimpleBooleanProperty aliveProperty() {
-        return alive;
-    }
-
-    public boolean getAlive() {
-        return alive.get();
     }
 }

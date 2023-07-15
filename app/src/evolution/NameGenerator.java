@@ -2,6 +2,7 @@ package evolution;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -13,15 +14,17 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class NameGenerator implements CreatureListener{
-    File file;
-    boolean giveNames;
-    List<String> allNames;
-    List<String> availableNames;
-    int amountOfNamesGiven;
-    StringProperty currentFile;
+    private File file;
+    private boolean giveNames;
+    private List<String> allNames;
+    private List<String> availableNames;
+    private int amountOfNamesGiven;
+    private StringProperty currentFile;
+    private HashMap<String, Creature> assignments; 
     
     NameGenerator() {
         giveNames = true;
+        assignments = new HashMap<>();
         allNames = new LinkedList<>();
         availableNames = new LinkedList<>();
         amountOfNamesGiven = 0;
@@ -54,16 +57,22 @@ public class NameGenerator implements CreatureListener{
                 String name = availableNames.get(index);
                 availableNames.remove(index);
                 c.giveName(name);
+                assignments.put(name, c);
             } else {
-                c.giveName("Creature" + Integer.toString(amountOfNamesGiven++));
+                String name = "Creature" + Integer.toString(amountOfNamesGiven++);
+                c.giveName(name);
+                assignments.put(name, c);
             }
         } else {
-            c.giveName("Creature" + Integer.toString(amountOfNamesGiven++));
+            String name = "Creature" + Integer.toString(amountOfNamesGiven++);
+            c.giveName(name);
+            assignments.put(name, c);
         }
     }
     @Override
     public void onCreatureDelete(Creature c) {
         String name = c.getName();
+        assignments.remove(name);
         if (allNames.contains(name)) {
             double around = ((double) allNames.indexOf(name))/allNames.size();
             availableNames.add((int) around*availableNames.size(), name);
@@ -77,6 +86,14 @@ public class NameGenerator implements CreatureListener{
     //getters
     public String getNameFile() {
         return currentFile.get();
+    }
+
+    public Creature getCreatureWithName(String name) {
+        if (assignments.containsKey(name)) {
+            return assignments.get(name);
+        } else {
+            return null;
+        }
     }
 
     //setters

@@ -2,23 +2,45 @@ package evolution.Visual;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import evolution.BreedingSettings;
 import evolution.Creature;
 import evolution.NameGenerator;
+import evolution.Relationship;
+import evolution.Relationship.Relation;
+import evolution.Visual.VisualElements.CreatureAddLabel;
+import evolution.Visual.VisualElements.CreatureLabel;
+import evolution.Visual.VisualElements.HeartShape;
+import evolution.Visual.VisualElements.MultiFacedDisplay;
 import evolution.Visual.VisualElements.MyChoiceBoxSkin;
 import evolution.Visual.VisualElements.MyColors;
+import evolution.Visual.VisualElements.SwordShape;
+import evolution.World.CreatureListener;
+import evolution.World.WorldListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
@@ -26,25 +48,40 @@ import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.util.converter.DefaultStringConverter;
 
-public class BreedingStats extends VBox {
+public class BreedingStats extends VBox implements CreatureListener, WorldListener {
     private BreedingSettings affectedSettings;
     private DoubleProperty averageMutations;
     private DoubleProperty crossingOverProbability;
     private DoubleProperty attraction;
+    private IntegerProperty incestPrevention;
     private DoubleProperty breedingProximity;
     private NameGenerator nameGenerator;
     private File homeFolder;
+    private List<Creature> creatures;
+    private ObjectProperty<Creature> selectedGirlfriend;
+    private ObjectProperty<Creature> selectedBoyfriend;
+    private IntegerProperty currentDay;
     
     //Visual variables
     private int headerHeight;
+    private final int maxOptions = 10;
+    private final double creatureLabelHeight = 20;
+    private final int maxPredictions = 10;
+    private final double predictionSquareHeight = 27;
+    private final double predictionSquareWidth = 37;
+
     //Boxes
     private HBox headerSection;
     private VBox slidersSection;
@@ -57,17 +94,29 @@ public class BreedingStats extends VBox {
     private VBox compatibilitySection;
         private VBox compatibilityHeader;
         private VBox compatibilityContent;
+            private GridPane compatibilitySelect;
+                private VBox girlfriendSuggestionBox;
+                private VBox boyfriendSuggestionBox;
+            private GridPane compatibilityDisplay;
 
     //Components
     private Label titleLabel;
     private Slider mutationsSlider;
     private Slider crossingOverSlider;
     private Slider attractionSlider;
+    private Slider incestPreventionSlider;
     private Slider breedingProximitySlider;
     private ChoiceBox<String> fileSelectionChoiceBox;
     private Button fileSelectionButton;
     private Label fileSelectionErrorMessage;
     private Label fileSelectionStatusMessage;
+    private CreatureLabel selectedGirlfriendLabel;
+    private CreatureLabel selectedBoyfriendLabel;
+    private TextField girlfriendSearcher;
+    private TextField boyfriendSearcher;
+    private LinkedList<CreatureAddLabel> girlfriendSuggestionLabels;
+    private LinkedList<CreatureAddLabel> boyfriendSuggestionLabels;
+    private LinkedList<MultiFacedDisplay<Relationship.Relation>> feelingDisplays;
     public BreedingStats(BreedingSettings breedingSettings, NameGenerator nameGenerator) {
         super();
         this.setBackground(new Background(new BackgroundFill(MyColors.wheat, null, null)));
@@ -79,12 +128,17 @@ public class BreedingStats extends VBox {
         averageMutations = new SimpleDoubleProperty(breedingSettings.getAverageMutations());
         crossingOverProbability = new SimpleDoubleProperty(breedingSettings.getCrossingOverProbability());
         attraction = new SimpleDoubleProperty(breedingSettings.getAttraction());
+        incestPrevention = new SimpleIntegerProperty(breedingSettings.getIncestPrevention());
         breedingProximity = new SimpleDoubleProperty(breedingSettings.getBreedingProximity());
+        creatures = new LinkedList<>();
+        currentDay = new SimpleIntegerProperty();
+        currentDay.addListener((p, ov, nv) -> updateCompatibilityDisplay());
         //bind
         breedingSettings.averageMutationsProperty().bind(averageMutations);
-        breedingSettings.CrossingOverProbabilityProperty().bind(crossingOverProbability);
-        breedingSettings.AttractionProperty().bind(attraction);
-        breedingSettings.BreedingProximityProperty().bind(breedingProximity);
+        breedingSettings.crossingOverProbabilityProperty().bind(crossingOverProbability);
+        breedingSettings.attractionProperty().bind(attraction);
+        breedingSettings.incestPreventionProperty().bind(incestPrevention);
+        breedingSettings.breedingProximityProperty().bind(breedingProximity);
         //visual
         //breeding settings
         headerSection = new HBox();
@@ -106,7 +160,7 @@ public class BreedingStats extends VBox {
             //mutations
             Label mutationLabel = new Label("Mutations");
             mutationLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-            Label mutationDescription = new Label("The average amount of mutations that occur when a new child gets \nconceived.");
+            Text mutationDescription = new Text("The average amount of mutations that occur when a new child gets \nconceived.");
             mutationDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
             mutationsSlider = new Slider(0, 5, affectedSettings.getAverageMutations());
             mutationsSlider.setBlockIncrement(0.01);
@@ -121,7 +175,7 @@ public class BreedingStats extends VBox {
             //crossing over
             Label crossingOverLabel = new Label("Crossing over");
             crossingOverLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-            Label crossingOverDescription = new Label("The probability that a crossing over occurs when a new child gets\nconceived.");
+            Text crossingOverDescription = new Text("The probability that a crossing over occurs when a new child gets\nconceived.");
             crossingOverDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
             crossingOverSlider = new Slider(0, 1, affectedSettings.getCrossingOverProbability());
             crossingOverSlider.setBlockIncrement(0.01);
@@ -136,7 +190,7 @@ public class BreedingStats extends VBox {
             //attraction
             Label attractionLabel = new Label("Attraction");
             attractionLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-            Label attractionDescription = new Label("The probability 2 random creatures find each other attractive.");
+            Text attractionDescription = new Text("The probability 2 random creatures find each other attractive.");
             attractionDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
             attractionSlider = new Slider(0, 1, affectedSettings.getAttraction());
             attractionSlider.setBlockIncrement(0.01);
@@ -148,10 +202,25 @@ public class BreedingStats extends VBox {
             Label attractionValue = new Label();
             attractionValue.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
             attractionValue.textProperty().bind(attraction.asString().concat(" chance of attraction"));
+            //generation
+            Label incestPreventionLabel = new Label("Incest prevention");
+            incestPreventionLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+            Text incestPreventionDescription = new Text("The amount of generations to check back in order to determine\nwhether 2 creatures are too closely related to fall in love.");
+            incestPreventionDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
+            incestPreventionSlider = new Slider(0, 5, affectedSettings.getIncestPrevention());
+            incestPreventionSlider.setBlockIncrement(1);
+            incestPreventionSlider.setMajorTickUnit(1);
+            incestPreventionSlider.setMinorTickCount(0);
+            incestPreventionSlider.setShowTickLabels(true);
+            incestPreventionSlider.setSnapToTicks(true);
+            incestPrevention.bind(incestPreventionSlider.valueProperty());
+            Label incestPreventionValue = new Label();
+            incestPreventionValue.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
+            incestPreventionValue.textProperty().bind(incestPrevention.asString().concat(" generations back"));
             //breeding proximity
             Label breedingProximityLabel = new Label("Breeding proximity");
             breedingProximityLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-            Label breedingProximityDescription = new Label("The distance at which 2 creatures can succesfully breed.");
+            Text breedingProximityDescription = new Text("The distance at which 2 creatures can succesfully breed.");
             breedingProximityDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
             breedingProximitySlider = new Slider(Creature.defaultSize, 50, affectedSettings.getBreedingProximity());
             breedingProximitySlider.setBlockIncrement(1);
@@ -162,11 +231,13 @@ public class BreedingStats extends VBox {
             breedingProximity.bind(breedingProximitySlider.valueProperty());
             Label breedingProximityValue = new Label();
             breedingProximityValue.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-            breedingProximityValue.textProperty().bind(attraction.asString().concat(" breeding distance"));
+            breedingProximityValue.textProperty().bind(breedingProximity.asString().concat(" breeding distance"));
+            
         //box
         slidersBox = new VBox(mutationLabel, mutationDescription, mutationsSlider, mutationValue,
                               crossingOverLabel, crossingOverDescription, crossingOverSlider, crossingOVerValue,
                               attractionLabel, attractionDescription, attractionSlider, attractionValue,
+                              incestPreventionLabel, incestPreventionDescription, incestPreventionSlider, incestPreventionValue,
                               breedingProximityLabel, breedingProximityDescription, breedingProximitySlider, breedingProximityValue);
         slidersBox.setPadding(new Insets(0, 10, 5, 10));
         slidersSection = new VBox(sliderBoxHeader, slidersBox);
@@ -221,7 +292,7 @@ public class BreedingStats extends VBox {
                 fileSelectionErrorMessage.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
                 fileSelectionStatusMessage = new Label();
                 fileSelectionStatusMessage.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-                fileSelectionStatusMessage.textProperty().bind(Bindings.concat("Currently in use file: ", nameGenerator.nameFileProperty()));
+                fileSelectionStatusMessage.textProperty().bind(Bindings.concat("Currently in use file: ", this.nameGenerator.nameFileProperty()));
             namePickerContents = new VBox(namePickerDescription, fileSelectBox, fileSelectionErrorMessage, fileSelectionStatusMessage);
             namePickerContents.setPadding(new Insets(0, 10, 5, 10));
             namePickerContents.setSpacing(5);
@@ -229,6 +300,214 @@ public class BreedingStats extends VBox {
         namePickerSection.setBackground(new Background(new BackgroundFill(Color.rgb(182, 205, 226), new CornerRadii(10), null)));
         namePickerSection.setBorder(new Border(new BorderStroke(Color.rgb(109, 154, 197), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
         this.getChildren().add(namePickerSection);
+
+        //compatibility
+            compatibilityHeader = new VBox();
+            compatibilityHeader.setPadding(new Insets(0, 10, 0, 10));
+                Label compatibilityTitle = new Label("Compatibility");
+                compatibilityTitle.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
+            compatibilityHeader.getChildren().add(compatibilityTitle);
+            compatibilityHeader.setPrefHeight(headerHeight);
+            compatibilityHeader.setBackground(new Background(new BackgroundFill(Color.rgb(152, 109, 176), new CornerRadii(10), new Insets(-2))));
+            compatibilityHeader.setBorder(new Border(new BorderStroke(Color.rgb(97, 63, 117), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2), new Insets(-2))));
+                compatibilitySelect = new GridPane();
+                    //girlfirend
+                    selectedGirlfriend = new SimpleObjectProperty<>(null);
+                    selectedGirlfriend.addListener((p, ov, nv) -> updateCompatibilityDisplay());
+                        selectedGirlfriendLabel = new CreatureLabel("-", null);
+                        selectedGirlfriendLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+                        selectedGirlfriendLabel.creatureProperty().bind(selectedGirlfriend);
+                    VBox selectedGirlfriendBox = new VBox(selectedGirlfriendLabel);
+                    selectedGirlfriendBox.backgroundProperty().bind(Bindings.when(selectedGirlfriendLabel.aliveProperty())
+                        .then(new Background(new BackgroundFill(MyColors.dutchWhite, new CornerRadii(10), new Insets(0))))
+                        .otherwise(new Background(new BackgroundFill(MyColors.dutchWhite.grayscale(), new CornerRadii(10), new Insets(0)))));
+                    selectedGirlfriendBox.borderProperty().bind(Bindings.when(selectedGirlfriendLabel.aliveProperty())
+                        .then(new Border(new BorderStroke(MyColors.sunset, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))))
+                        .otherwise(new Border(new BorderStroke(MyColors.sunset.grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2)))));
+                    selectedGirlfriendBox.prefWidthProperty().bind(compatibilitySelect.widthProperty().multiply(0.4));
+                    selectedGirlfriendBox.setPrefHeight(50);
+                    selectedGirlfriendBox.setAlignment(Pos.CENTER);
+                compatibilitySelect.add(selectedGirlfriendBox, 0, 0);
+                    //heart
+                    HeartShape heart = new HeartShape(55, Color.RED);
+                    heart.getShapeToShow().setFill(MyColors.bittersweet);
+                    heart.getShapeToShow().setStroke(MyColors.tomato);
+                    heart.getShapeToShow().setStrokeWidth(4);
+                compatibilitySelect.add(heart.getShapeToShow(), 1, 0);
+                    //boyfriend
+                    selectedBoyfriend = new SimpleObjectProperty<>(null);
+                    selectedBoyfriend.addListener((p, ov, nv) -> updateCompatibilityDisplay());
+                        selectedBoyfriendLabel = new CreatureLabel("-", null);
+                        selectedBoyfriendLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 25));
+                        selectedBoyfriendLabel.creatureProperty().bind(selectedBoyfriend);
+                    VBox selectedBoyfriendBox = new VBox(selectedBoyfriendLabel);
+                    selectedBoyfriendBox.backgroundProperty().bind(Bindings.when(selectedBoyfriendLabel.aliveProperty())
+                        .then(new Background(new BackgroundFill(MyColors.dutchWhite, new CornerRadii(10), new Insets(0))))
+                        .otherwise(new Background(new BackgroundFill(MyColors.dutchWhite.grayscale(), new CornerRadii(10), new Insets(0)))));
+                    selectedBoyfriendBox.borderProperty().bind(Bindings.when(selectedBoyfriendLabel.aliveProperty())
+                        .then(new Border(new BorderStroke(MyColors.sunset, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))))
+                        .otherwise(new Border(new BorderStroke(MyColors.sunset.grayscale(), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2)))));
+                    selectedBoyfriendBox.prefWidthProperty().bind(compatibilitySelect.widthProperty().multiply(0.4));
+                    selectedBoyfriendBox.setPrefHeight(45);
+                    selectedBoyfriendBox.setAlignment(Pos.CENTER);
+                compatibilitySelect.add(selectedBoyfriendBox, 2, 0);
+                    //girlfriend search textfield
+                    girlfriendSearcher = new TextField();
+                    girlfriendSearcher.setBackground(new Background(new BackgroundFill(MyColors.iceBlue, new CornerRadii(12), new Insets(0))));
+                    girlfriendSearcher.setBorder(new Border(new BorderStroke(MyColors.verdrigis, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+                    girlfriendSearcher.prefWidthProperty().bind(compatibilitySelect.widthProperty().multiply(0.4));
+                    girlfriendSearcher.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 18));
+                    girlfriendSearcher.textProperty().addListener(new ChangeListener<String>() {
+
+                        @Override
+                        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                            updateSearchSuggestions(newValue, girlfriendSuggestionBox, girlfriendSuggestionLabels);
+                        }
+                        
+                    });
+                compatibilitySelect.add(girlfriendSearcher, 0, 1);
+                    //boyfriend search textfield
+                    boyfriendSearcher = new TextField();
+                    boyfriendSearcher.setBackground(new Background(new BackgroundFill(MyColors.iceBlue, new CornerRadii(12), new Insets(0))));
+                    boyfriendSearcher.setBorder(new Border(new BorderStroke(MyColors.verdrigis, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3))));
+                    boyfriendSearcher.prefWidthProperty().bind(compatibilitySelect.widthProperty().multiply(0.4));
+                    boyfriendSearcher.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 18));
+                    boyfriendSearcher.textProperty().addListener(new ChangeListener<String>() {
+
+                        @Override
+                        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                            updateSearchSuggestions(newValue, boyfriendSuggestionBox, boyfriendSuggestionLabels);
+                        }
+                        
+                    });
+                compatibilitySelect.add(boyfriendSearcher, 2, 1);
+                    //girlfriend search suggestions
+                    girlfriendSuggestionBox = new VBox();
+                    girlfriendSuggestionBox.prefWidthProperty().bind(compatibilitySelect.widthProperty().multiply(0.4));
+                    girlfriendSuggestionLabels = new LinkedList<>();
+                    for (int i = 0; i<maxOptions; i++) {
+                        CreatureAddLabel cLabel = new CreatureAddLabel(null);
+                        girlfriendSuggestionLabels.add(cLabel);
+                        cLabel.setPrefHeight(creatureLabelHeight);
+                        cLabel.setMaxHeight(creatureLabelHeight);
+                        cLabel.prefWidthProperty().bind(girlfriendSuggestionBox.widthProperty());
+                        cLabel.setInfoEvent(e -> cLabel.getCreature().gotClickedOn());
+                        cLabel.setAddEvent(e -> {selectedGirlfriend.set(cLabel.getCreature());
+                                                 girlfriendSearcher.setText("");});
+                    }
+                compatibilitySelect.add(girlfriendSuggestionBox, 0, 2);
+                    //girlfriend search suggestions
+                    boyfriendSuggestionBox = new VBox();
+                    boyfriendSuggestionBox.prefWidthProperty().bind(compatibilitySelect.widthProperty().multiply(0.4));
+                    boyfriendSuggestionLabels = new LinkedList<>();
+                    for (int i = 0; i<maxOptions; i++) {
+                        CreatureAddLabel cLabel = new CreatureAddLabel(null);
+                        boyfriendSuggestionLabels.add(cLabel);
+                        cLabel.setPrefHeight(creatureLabelHeight);
+                        cLabel.setMaxHeight(creatureLabelHeight);
+                        cLabel.prefWidthProperty().bind(boyfriendSuggestionBox.widthProperty());
+                        cLabel.setInfoEvent(e -> cLabel.getCreature().gotClickedOn());
+                        cLabel.setAddEvent(e -> {selectedBoyfriend.set(cLabel.getCreature());
+                                                 boyfriendSearcher.setText("");});
+                    }
+                compatibilitySelect.add(boyfriendSuggestionBox, 2, 2);
+                compatibilitySelect.setVgap(10);
+                compatibilitySelect.setHgap(10);
+                compatibilityDisplay = new GridPane();
+                    feelingDisplays = new LinkedList<>();
+                    Label dayLabel = new Label("Day");
+                    dayLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+                    affectedSettings.attractionProperty().addListener((p, nv, ov) -> updateCompatibilityDisplay());
+                    affectedSettings.incestPreventionProperty().addListener((p, nv, ov) -> updateCompatibilityDisplay());
+                    compatibilityDisplay.add(dayLabel, 0, 0);
+                    for (int i=0; i<maxPredictions; i++) {
+                        Label smallDayLabel = new Label();
+                        smallDayLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 18));
+                        smallDayLabel.textProperty().bind(currentDay.add(i).asString());
+                        compatibilityDisplay.add(smallDayLabel, 1+i, 0);
+                        Map<Relationship.Relation, Node> emotionHashmap = new HashMap<>();
+                        //love
+                        HeartShape heartInLoveBox = new HeartShape(18, Color.RED);
+                        heartInLoveBox.getShapeToShow().setFill(MyColors.bittersweet);
+                        heartInLoveBox.getShapeToShow().setStroke(MyColors.tomato);
+                        heartInLoveBox.getShapeToShow().setStrokeWidth(2);
+                        HBox loveBox = new HBox(heartInLoveBox.getShapeToShow());
+                        loveBox.setBackground(new Background(new BackgroundFill(Color.rgb(249, 159, 188), new CornerRadii(5), null)));
+                        loveBox.setBorder(new Border(new BorderStroke(Color.rgb(246, 121, 146), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
+                        loveBox.setAlignment(Pos.CENTER);
+                        loveBox.setPadding(new Insets(1));
+                        emotionHashmap.put(Relationship.Relation.LOVE, loveBox);
+                        //neutral
+                        Rectangle neutralBox = new Rectangle(predictionSquareWidth, predictionSquareHeight, Color.rgb(231, 239, 230));
+                        neutralBox.setStroke(Color.rgb(195, 215, 193));
+                        emotionHashmap.put(Relationship.Relation.NEUTRAL, neutralBox);
+                        //hate
+                        SwordShape swords = new SwordShape(18);
+                        HBox hateBox = new HBox(swords);
+                        hateBox.setBackground(new Background(new BackgroundFill(Color.rgb(39, 3, 2), new CornerRadii(5), null)));
+                        hateBox.setBorder(new Border(new BorderStroke(Color.rgb(0, 0, 0), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
+                        hateBox.setAlignment(Pos.CENTER);
+                        hateBox.setPadding(new Insets(1));
+                        emotionHashmap.put(Relationship.Relation.HATE, hateBox);
+                        //dayRelationShipDisplay
+                        MultiFacedDisplay<Relationship.Relation> dayRelationShipDisplay = new MultiFacedDisplay<Relationship.Relation>(emotionHashmap, new Circle(10, Color.WHITE), Relation.NEUTRAL);
+                        dayRelationShipDisplay.setPrefSize(predictionSquareWidth, predictionSquareHeight);
+                        dayRelationShipDisplay.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
+                        dayRelationShipDisplay.setMinSize(USE_PREF_SIZE, USE_PREF_SIZE);
+                        feelingDisplays.add(dayRelationShipDisplay);
+                        compatibilityDisplay.add(dayRelationShipDisplay, 1+i, 1);
+                    }
+                compatibilityDisplay.setHgap(5);
+            compatibilityContent = new VBox(compatibilitySelect, compatibilityDisplay);
+            compatibilityContent.setPadding(new Insets(5, 10, 5, 10));
+            compatibilityContent.setAlignment(Pos.TOP_CENTER);
+        compatibilitySection = new VBox(compatibilityHeader, compatibilityContent);
+        compatibilitySection.setBackground(new Background(new BackgroundFill(Color.rgb(181, 149, 198), new CornerRadii(10), null)));
+        compatibilitySection.setBorder(new Border(new BorderStroke(Color.rgb(142, 96, 169), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
+        this.getChildren().add(compatibilitySection);
     }
 
+    private void updateCompatibilityDisplay() {
+        if (selectedGirlfriend.get() == null || selectedBoyfriend.get() == null) {
+            return;
+        }
+        int day;
+        for (int i=0; i<maxOptions; i++) {
+            day = currentDay.get()+i;
+            feelingDisplays.get(day).setValue(Relationship.evaluate(selectedBoyfriend.get(), selectedGirlfriend.get(), day, affectedSettings.getIncestPrevention(),  3, affectedSettings.getAttraction(), 0.5));
+        }
+    }
+
+    private void updateSearchSuggestions(String searchString, VBox box, List<CreatureAddLabel> labels) {
+        for (int i = 0; i<labels.size(); i++) {
+            box.getChildren().remove(labels.get(i));
+        }
+        List<Creature> options = creatures.stream().filter(c -> c.getName().toLowerCase().substring(0, Math.min(searchString.length(), c.getName().length())).equals(searchString.toLowerCase())).toList();
+        if (options.size()<=maxOptions && !searchString.equals("")) {
+            for (int i = 0; i<options.size(); i++) {
+                labels.get(i).setCreature(options.get(i));
+                box.getChildren().add(labels.get(i));
+            }
+        }
+    }
+
+    @Override
+    public void onCreatureCreate(Creature c) {
+        creatures.add(c);
+    }
+
+    @Override
+    public void onCreatureDelete(Creature c) {
+        creatures.remove(c);
+    }
+
+    @Override
+    public void onCreatureUpdate(Creature c) {
+        return;
+    }
+
+    @Override
+    public void setupNeededConnections(SimpleIntegerProperty day, SimpleDoubleProperty worldSize) {
+        currentDay.bind(day);
+    }
 }

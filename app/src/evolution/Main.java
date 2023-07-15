@@ -93,8 +93,10 @@ public class Main extends Application{
         mainLogic.addCreatureListener(world);
         mainLogic.addCreatureListener(typeStats);
         mainLogic.addCreatureListener(creatureOverview);
-        mainLogic.addWorldListener(world);
+        mainLogic.addCreatureListener(breedingSettingsDisplay);
         mainLogic.addCreatureListener(nameGranter);
+        mainLogic.addWorldListener(world);
+        mainLogic.addWorldListener(breedingSettingsDisplay);
         mainLogic.addCreatureClickListener(creatureStats);
         mainLogic.addCreatureClickListener(screenSwapper);
         creatureOverview.addCreatureBiome(mainLogic);
@@ -111,6 +113,7 @@ public class Main extends Application{
         primaryStage.show();
 
 
+        
         
         int mutations = 3;
         double crossingOver = 0.1;
@@ -134,7 +137,8 @@ public class Main extends Application{
             mainLogic.addCreature(Relationship.breed(mainLogic, -512+1024*x0, -50, mainLogic.getCreature(60+x0*2), mainLogic.getCreature(60+x0*2+1), mutations, crossingOver, encoder));
         }
         
-        /*
+        
+        /* 
         for (int x=0; x<45; x++) {
             if (x%3 == 2) {
                 mainLogic.addCreature(Relationship.breed(mainLogic, 50+(x/3)*30, 100, mainLogic.getCreature(x-2), mainLogic.getCreature(x-1), 0, encoder));
@@ -165,7 +169,7 @@ public class Main extends Application{
         for (int x=2; x<105; x+= 5) {
             mainLogic.getCreature(x).setSleeping(true);
             mainLogic.getCreature(x).setAge(50);
-        }
-        */
+        }*/
+        
     }
 }

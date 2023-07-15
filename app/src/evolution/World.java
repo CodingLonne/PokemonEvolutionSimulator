@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import evolution.Interfaces.CreaturePlaceField;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
@@ -51,6 +52,7 @@ public class World implements CreaturePlaceField {
         }
     }
 
+    //creature adding/removing
     public void addCreature(double x, double y) {
         Creature newCreature = new Creature(this, x, y, geneEncoder);
         allCreatures.add(newCreature);
@@ -96,6 +98,7 @@ public class World implements CreaturePlaceField {
         allCreatures.remove(c);
     }
 
+    //getters
     public Creature getCreature(int i) {
         return allCreatures.get(i);
     }
@@ -108,14 +111,20 @@ public class World implements CreaturePlaceField {
         return worldSize.get();
     }
 
+    public int getDay() {
+        return day.get();
+    }
+
+    public proteinEncodingManager getEncoder() {
+        return geneEncoder;
+    }
+
+    //setters
     public void setWorldSize(double d) {
         worldSize.set(d);
     }
 
-    public DoubleProperty worldSizeProperty() {
-        return worldSize;
-    }
-    
+    //adders
     public void addCreatureListener(CreatureListener listener) {
         creatureListeners.add(listener);
     }
@@ -128,8 +137,12 @@ public class World implements CreaturePlaceField {
         creatureClickListeners.add(listener);
     }
 
-    public proteinEncodingManager getEncoder() {
-        return geneEncoder;
+    //properties
+    public DoubleProperty worldSizeProperty() {
+        return worldSize;
     }
 
+    public ReadOnlyIntegerProperty dayProperty() {
+        return day;
+    }
 }
