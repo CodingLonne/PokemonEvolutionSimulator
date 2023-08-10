@@ -80,4 +80,10 @@ public class CreatureAddLabel extends HBox{
     public void setAddEvent(EventHandler<ActionEvent> event) {
         addButton.setOnAction(event);
     }
+
+    public void setFont(Font f) {
+        creatureLabel.setFont(f);
+        infoButton.setFont(f);
+        addButton.setFont(f);
+    }
 }

@@ -2,7 +2,6 @@ package evolution;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Random;
 
 import evolution.Relationship.Relation;
 import evolution.World.CreatureClickListener;
@@ -85,11 +84,6 @@ public class Creature implements proteinChangeListener{
         encoder.addListener(this);
         creatureClickListeners = new LinkedList<>();
         this.world = world;
-        //TODO remove this
-        Random random = new Random();
-        this.health.set(random.nextDouble(maxHealth.get()));
-        this.energy.set(random.nextDouble(maxEnergy.get()));
-        this.age.set(random.nextInt(12));
     }
 
     public Creature(World world, double x, double y, Dna dna, proteinEncodingManager encoder) {

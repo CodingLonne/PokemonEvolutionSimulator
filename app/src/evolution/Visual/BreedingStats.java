@@ -30,7 +30,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -61,7 +60,7 @@ import javafx.scene.text.Text;
 import javafx.util.converter.DefaultStringConverter;
 
 public class BreedingStats extends VBox implements CreatureListener, WorldListener {
-    private BreedingSettings affectedSettings;
+    private BreedingSettings settings;
     private DoubleProperty averageMutations;
     private DoubleProperty crossingOverProbability;
     private DoubleProperty attraction;
@@ -75,7 +74,7 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
     private IntegerProperty currentDay;
     
     //Visual variables
-    private int headerHeight;
+    private final int headerHeight = 60;
     private final int maxOptions = 10;
     private final double creatureLabelHeight = 20;
     private final int maxPredictions = 10;
@@ -123,7 +122,7 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
         this.setPadding(new Insets(5, 30, 5, 20));
         this.setSpacing(15);
         //initiate variables
-        affectedSettings = breedingSettings;
+        settings = breedingSettings;
         this.nameGenerator = nameGenerator;
         averageMutations = new SimpleDoubleProperty(breedingSettings.getAverageMutations());
         crossingOverProbability = new SimpleDoubleProperty(breedingSettings.getCrossingOverProbability());
@@ -155,14 +154,14 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
                 sliderBoxTitle.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
             sliderBoxHeader.getChildren().add(sliderBoxTitle);
             sliderBoxHeader.setPrefHeight(headerHeight);
-            sliderBoxHeader.setBackground(new Background(new BackgroundFill(Color.rgb(244, 102, 147), new CornerRadii(10), new Insets(-2))));
-            sliderBoxHeader.setBorder(new Border(new BorderStroke(Color.rgb(239, 26, 94), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2), new Insets(-2))));
+            sliderBoxHeader.setBackground(new Background(new BackgroundFill(MyColors.cyclamen, new CornerRadii(10), new Insets(-2))));
+            sliderBoxHeader.setBorder(new Border(new BorderStroke(MyColors.cerise, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2), new Insets(-2))));
             //mutations
             Label mutationLabel = new Label("Mutations");
             mutationLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
             Text mutationDescription = new Text("The average amount of mutations that occur when a new child gets \nconceived.");
             mutationDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-            mutationsSlider = new Slider(0, 5, affectedSettings.getAverageMutations());
+            mutationsSlider = new Slider(0, 5, settings.getAverageMutations());
             mutationsSlider.setBlockIncrement(0.01);
             mutationsSlider.setMajorTickUnit(1d);
             mutationsSlider.setMinorTickCount(4);
@@ -177,7 +176,7 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
             crossingOverLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
             Text crossingOverDescription = new Text("The probability that a crossing over occurs when a new child gets\nconceived.");
             crossingOverDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-            crossingOverSlider = new Slider(0, 1, affectedSettings.getCrossingOverProbability());
+            crossingOverSlider = new Slider(0, 1, settings.getCrossingOverProbability());
             crossingOverSlider.setBlockIncrement(0.01);
             crossingOverSlider.setMajorTickUnit(0.1);
             crossingOverSlider.setMinorTickCount(4);
@@ -190,24 +189,24 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
             //attraction
             Label attractionLabel = new Label("Attraction");
             attractionLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-            Text attractionDescription = new Text("The probability 2 random creatures find each other attractive.");
+            Text attractionDescription = new Text("The percentage that 2 creatures need to have in common to fall\nin love.");
             attractionDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-            attractionSlider = new Slider(0, 1, affectedSettings.getAttraction());
-            attractionSlider.setBlockIncrement(0.01);
-            attractionSlider.setMajorTickUnit(0.1);
+            attractionSlider = new Slider(0, 100, settings.getAttraction());
+            attractionSlider.setBlockIncrement(1);
+            attractionSlider.setMajorTickUnit(10);
             attractionSlider.setMinorTickCount(4);
             attractionSlider.setShowTickLabels(true);
             attractionSlider.setSnapToTicks(true);
-            attraction.bind(attractionSlider.valueProperty());
+            attraction.bind(attractionSlider.valueProperty().multiply(0.01));
             Label attractionValue = new Label();
             attractionValue.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-            attractionValue.textProperty().bind(attraction.asString().concat(" chance of attraction"));
+            attractionValue.textProperty().bind(attraction.multiply(100).asString().concat("% in common causes attraction"));
             //generation
             Label incestPreventionLabel = new Label("Incest prevention");
             incestPreventionLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
             Text incestPreventionDescription = new Text("The amount of generations to check back in order to determine\nwhether 2 creatures are too closely related to fall in love.");
             incestPreventionDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-            incestPreventionSlider = new Slider(0, 5, affectedSettings.getIncestPrevention());
+            incestPreventionSlider = new Slider(0, 5, settings.getIncestPrevention());
             incestPreventionSlider.setBlockIncrement(1);
             incestPreventionSlider.setMajorTickUnit(1);
             incestPreventionSlider.setMinorTickCount(0);
@@ -222,7 +221,7 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
             breedingProximityLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
             Text breedingProximityDescription = new Text("The distance at which 2 creatures can succesfully breed.");
             breedingProximityDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-            breedingProximitySlider = new Slider(Creature.defaultSize, 50, affectedSettings.getBreedingProximity());
+            breedingProximitySlider = new Slider(Creature.defaultSize, 50, settings.getBreedingProximity());
             breedingProximitySlider.setBlockIncrement(1);
             breedingProximitySlider.setMajorTickUnit(10d);
             breedingProximitySlider.setMinorTickCount(4);
@@ -241,8 +240,8 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
                               breedingProximityLabel, breedingProximityDescription, breedingProximitySlider, breedingProximityValue);
         slidersBox.setPadding(new Insets(0, 10, 5, 10));
         slidersSection = new VBox(sliderBoxHeader, slidersBox);
-        slidersSection.setBackground(new Background(new BackgroundFill(Color.rgb(249, 159, 188), new CornerRadii(10), null)));
-        slidersSection.setBorder(new Border(new BorderStroke(Color.rgb(246, 121, 161), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
+        slidersSection.setBackground(new Background(new BackgroundFill(MyColors.amaranthPink, new CornerRadii(10), null)));
+        slidersSection.setBorder(new Border(new BorderStroke(MyColors.rosePompadour, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
         this.getChildren().add(slidersSection);
 
         //name file settings
@@ -254,19 +253,19 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
                 namePickerTitle.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
             namePickerHeader.getChildren().add(namePickerTitle);
             namePickerHeader.setPrefHeight(headerHeight);
-            namePickerHeader.setBackground(new Background(new BackgroundFill(Color.rgb(80, 134, 185), new CornerRadii(10), new Insets(-2))));
-            namePickerHeader.setBorder(new Border(new BorderStroke(Color.rgb(52, 93, 131), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2), new Insets(-2))));
+            namePickerHeader.setBackground(new Background(new BackgroundFill(MyColors.steelBlue, new CornerRadii(10), new Insets(-2))));
+            namePickerHeader.setBorder(new Border(new BorderStroke(MyColors.lapisLazuli, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2), new Insets(-2))));
                 Label namePickerDescription = new Label("File to pick the names from:");
                 namePickerDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
                     fileSelectionChoiceBox = new ChoiceBox<>();
                     fileSelectionChoiceBox.getItems().addAll(Arrays.asList(homeFolder.listFiles()).stream().map(x -> x.getName()).filter(x -> x.charAt(0)!='.').toList());
                     MyChoiceBoxSkin<String> fileSelectionChoiceBoxSkin = new MyChoiceBoxSkin<>(fileSelectionChoiceBox, new DefaultStringConverter());
-                    fileSelectionChoiceBoxSkin.setBackgroundColorField(Color.rgb(143, 224, 147));
-                    fileSelectionChoiceBoxSkin.setBorderColorField(Color.rgb(48, 176, 55));
+                    fileSelectionChoiceBoxSkin.setBackgroundColorField(MyColors.lightGreen);
+                    fileSelectionChoiceBoxSkin.setBorderColorField(MyColors.darkPastelGreen);
                     fileSelectionChoiceBox.setSkin(fileSelectionChoiceBoxSkin);
                     fileSelectionButton = new Button("change file");
-                    fileSelectionButton.setBackground(new Background(new BackgroundFill(Color.rgb(254, 192, 134), new CornerRadii(10), new Insets(0))));
-                    fileSelectionButton.setBorder(new Border(new BorderStroke(Color.rgb(253, 150, 53), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3), new Insets(0))));
+                    fileSelectionButton.setBackground(new Background(new BackgroundFill(MyColors.peach, new CornerRadii(10), new Insets(0))));
+                    fileSelectionButton.setBorder(new Border(new BorderStroke(MyColors.princetonOrange, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(3), new Insets(0))));
                     fileSelectionButton.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
                     fileSelectionButton.setOnMouseClicked(new EventHandler<Event>() {
 
@@ -297,8 +296,8 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
             namePickerContents.setPadding(new Insets(0, 10, 5, 10));
             namePickerContents.setSpacing(5);
         namePickerSection = new VBox(namePickerHeader, namePickerContents);
-        namePickerSection.setBackground(new Background(new BackgroundFill(Color.rgb(182, 205, 226), new CornerRadii(10), null)));
-        namePickerSection.setBorder(new Border(new BorderStroke(Color.rgb(109, 154, 197), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
+        namePickerSection.setBackground(new Background(new BackgroundFill(MyColors.blueGray, new CornerRadii(10), null)));
+        namePickerSection.setBorder(new Border(new BorderStroke(MyColors.columbiaBlue, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
         this.getChildren().add(namePickerSection);
 
         //compatibility
@@ -308,8 +307,8 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
                 compatibilityTitle.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
             compatibilityHeader.getChildren().add(compatibilityTitle);
             compatibilityHeader.setPrefHeight(headerHeight);
-            compatibilityHeader.setBackground(new Background(new BackgroundFill(Color.rgb(152, 109, 176), new CornerRadii(10), new Insets(-2))));
-            compatibilityHeader.setBorder(new Border(new BorderStroke(Color.rgb(97, 63, 117), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2), new Insets(-2))));
+            compatibilityHeader.setBackground(new Background(new BackgroundFill(MyColors.amethyst, new CornerRadii(10), new Insets(-2))));
+            compatibilityHeader.setBorder(new Border(new BorderStroke(MyColors.finn2, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2), new Insets(-2))));
                 compatibilitySelect = new GridPane();
                     //girlfirend
                     selectedGirlfriend = new SimpleObjectProperty<>(null);
@@ -417,8 +416,8 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
                     feelingDisplays = new LinkedList<>();
                     Label dayLabel = new Label("Day");
                     dayLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
-                    affectedSettings.attractionProperty().addListener((p, nv, ov) -> updateCompatibilityDisplay());
-                    affectedSettings.incestPreventionProperty().addListener((p, nv, ov) -> updateCompatibilityDisplay());
+                    settings.attractionProperty().addListener((p, nv, ov) -> updateCompatibilityDisplay());
+                    settings.incestPreventionProperty().addListener((p, nv, ov) -> updateCompatibilityDisplay());
                     compatibilityDisplay.add(dayLabel, 0, 0);
                     for (int i=0; i<maxPredictions; i++) {
                         Label smallDayLabel = new Label();
@@ -432,20 +431,20 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
                         heartInLoveBox.getShapeToShow().setStroke(MyColors.tomato);
                         heartInLoveBox.getShapeToShow().setStrokeWidth(2);
                         HBox loveBox = new HBox(heartInLoveBox.getShapeToShow());
-                        loveBox.setBackground(new Background(new BackgroundFill(Color.rgb(249, 159, 188), new CornerRadii(5), null)));
-                        loveBox.setBorder(new Border(new BorderStroke(Color.rgb(246, 121, 146), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
+                        loveBox.setBackground(new Background(new BackgroundFill(MyColors.amaranthPink2, new CornerRadii(5), null)));
+                        loveBox.setBorder(new Border(new BorderStroke(MyColors.rosePompadour2, BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
                         loveBox.setAlignment(Pos.CENTER);
                         loveBox.setPadding(new Insets(1));
                         emotionHashmap.put(Relationship.Relation.LOVE, loveBox);
                         //neutral
-                        Rectangle neutralBox = new Rectangle(predictionSquareWidth, predictionSquareHeight, Color.rgb(231, 239, 230));
-                        neutralBox.setStroke(Color.rgb(195, 215, 193));
+                        Rectangle neutralBox = new Rectangle(predictionSquareWidth, predictionSquareHeight, MyColors.mintCream);
+                        neutralBox.setStroke(MyColors.ashGrey);
                         emotionHashmap.put(Relationship.Relation.NEUTRAL, neutralBox);
                         //hate
                         SwordShape swords = new SwordShape(18);
                         HBox hateBox = new HBox(swords);
-                        hateBox.setBackground(new Background(new BackgroundFill(Color.rgb(39, 3, 2), new CornerRadii(5), null)));
-                        hateBox.setBorder(new Border(new BorderStroke(Color.rgb(0, 0, 0), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
+                        hateBox.setBackground(new Background(new BackgroundFill(MyColors.blackBean, new CornerRadii(5), null)));
+                        hateBox.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
                         hateBox.setAlignment(Pos.CENTER);
                         hateBox.setPadding(new Insets(1));
                         emotionHashmap.put(Relationship.Relation.HATE, hateBox);
@@ -462,8 +461,8 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
             compatibilityContent.setPadding(new Insets(5, 10, 5, 10));
             compatibilityContent.setAlignment(Pos.TOP_CENTER);
         compatibilitySection = new VBox(compatibilityHeader, compatibilityContent);
-        compatibilitySection.setBackground(new Background(new BackgroundFill(Color.rgb(181, 149, 198), new CornerRadii(10), null)));
-        compatibilitySection.setBorder(new Border(new BorderStroke(Color.rgb(142, 96, 169), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
+        compatibilitySection.setBackground(new Background(new BackgroundFill(MyColors.wisteria, new CornerRadii(10), null)));
+        compatibilitySection.setBorder(new Border(new BorderStroke(MyColors.purpureus2, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
         this.getChildren().add(compatibilitySection);
     }
 
@@ -474,7 +473,7 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
         int day;
         for (int i=0; i<maxOptions; i++) {
             day = currentDay.get()+i;
-            feelingDisplays.get(day).setValue(Relationship.evaluate(selectedBoyfriend.get(), selectedGirlfriend.get(), day, affectedSettings.getIncestPrevention(),  3, affectedSettings.getAttraction(), 0.5));
+            feelingDisplays.get(day).setValue(Relationship.evaluate(selectedBoyfriend.get(), selectedGirlfriend.get(), day, settings.getIncestPrevention(),  3, settings.getAttraction(), 0.5));
         }
     }
 

@@ -446,8 +446,8 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
         //the spawn button
         spawnButtonBox = new VBox();
         spawnButton = new Button("Spawn");
-        spawnButton.setBackground(new Background(new BackgroundFill(Color.rgb(255, 184, 112), new CornerRadii(10), new Insets(0))));
-        spawnButton.setBorder(new Border(new BorderStroke(Color.rgb(255, 143, 31), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2), new Insets(0))));
+        spawnButton.setBackground(new Background(new BackgroundFill(MyColors.fawn, new CornerRadii(10), new Insets(0))));
+        spawnButton.setBorder(new Border(new BorderStroke(MyColors.darkOrangeWeb, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2), new Insets(0))));
         spawnButton.prefWidthProperty().bind(spawnButtonBox.widthProperty());
         spawnButton.setMinHeight(50);
         spawnButton.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 15));
@@ -702,6 +702,7 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
         creatureViewSection.getChildren().add(creatureListScrollPane);
         this.getChildren().add(creatureViewSection);
     }
+    
     private void updateCreatureList() {
         this.creatureList = creatures.stream().filter(c -> filteringKind.get() == null || filteringKind.get().compare(c, filterComparator.get(), filterAmount.get())).filter(c -> filteringKind.get() == null || filteringKind.get().contains(c, searchText.get())).sorted(sortingKind.get().getCreatureComparator(inverseSort.get())).collect(Collectors.toList());
         for (int i=0; i<Math.max(creatureList.size(), creatureDisplays.size()); i++) {

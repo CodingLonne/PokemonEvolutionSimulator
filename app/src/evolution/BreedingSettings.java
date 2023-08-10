@@ -17,7 +17,7 @@ public class BreedingSettings {
     private DoubleProperty attraction;
     private DoubleProperty breedingProximity;
     private IntegerProperty incestPrevention;
-    public BreedingSettings(double averageMutations, double crossingOverProbability, double attraction, double breedingProximity) {
+    public BreedingSettings(double averageMutations, double crossingOverProbability, double attraction, double breedingProximity, int incestPrevention) {
         if (crossingOverProbability<0 || crossingOverProbability>1) {
             throw new IllegalArgumentException("invalid crossing over probability: " + Double.toString(crossingOverProbability));
         }
@@ -28,10 +28,10 @@ public class BreedingSettings {
         this.crossingOverProbability = new SimpleDoubleProperty(crossingOverProbability);
         this.attraction = new SimpleDoubleProperty(attraction);
         this.breedingProximity = new SimpleDoubleProperty(breedingProximity);
-        this.incestPrevention = new SimpleIntegerProperty(defaultIncestPrevention);
+        this.incestPrevention = new SimpleIntegerProperty(incestPrevention);
     }
     public BreedingSettings() {
-        this(defaultAverageMutations, defaultCrossingOverProbability, defaultAttraction, defaultBreedingProximity);
+        this(defaultAverageMutations, defaultCrossingOverProbability, defaultAttraction, defaultBreedingProximity, defaultIncestPrevention);
     }
     
     //getters

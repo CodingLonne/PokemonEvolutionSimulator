@@ -20,8 +20,7 @@ public class NameGenerator implements CreatureListener{
     private List<String> availableNames;
     private int amountOfNamesGiven;
     private StringProperty currentFile;
-    private HashMap<String, Creature> assignments; 
-    
+    private HashMap<String, Creature> assignments;
     NameGenerator() {
         giveNames = true;
         assignments = new HashMap<>();

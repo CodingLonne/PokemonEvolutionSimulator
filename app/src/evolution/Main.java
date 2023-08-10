@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import evolution.Visual.BreedingStats;
 import evolution.Visual.CreatureStats;
 import evolution.Visual.CreaturesDisplay;
+import evolution.Visual.FightingStats;
 import evolution.Visual.ScreenManager;
 import evolution.Visual.TypeStatsDisplay;
 import evolution.Visual.VisualWorld;
@@ -72,7 +73,7 @@ public class Main extends Application{
                     BreedingStats breedingSettingsDisplay = new BreedingStats(breedingSettings, nameGranter);
                     breedingSettingsDisplay.setPrefWidth(550);
 
-                    Pane fightingSettingsDisplay = new Pane();
+                    FightingStats fightingSettingsDisplay = new FightingStats(fightingSettings);
                     fightingSettingsDisplay.setBackground(new Background(new BackgroundFill(MyColors.wheat, null, null)));
                     fightingSettingsDisplay.setPadding(new Insets(5, 30, 5, 20));
                     fightingSettingsDisplay.setPrefWidth(550);
@@ -95,6 +96,7 @@ public class Main extends Application{
         mainLogic.addCreatureListener(creatureOverview);
         mainLogic.addCreatureListener(breedingSettingsDisplay);
         mainLogic.addCreatureListener(nameGranter);
+        mainLogic.addCreatureListener(fightingSettingsDisplay);
         mainLogic.addWorldListener(world);
         mainLogic.addWorldListener(breedingSettingsDisplay);
         mainLogic.addCreatureClickListener(creatureStats);
