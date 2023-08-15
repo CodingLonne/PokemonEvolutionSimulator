@@ -9,6 +9,7 @@ import java.util.Map;
 import evolution.AdvantageSettings;
 import evolution.Creature;
 import evolution.FightingSettings;
+import evolution.MyBindings;
 import evolution.Type;
 import evolution.AdvantageSettings.AttackStrenght;
 import evolution.Visual.VisualElements.CreatureAddLabel;
@@ -67,6 +68,8 @@ public class FightingStats extends VBox implements CreatureListener{
     //type overview section
     private ObjectProperty<Type> highlightedOffenseType;
     private ObjectProperty<Type> highlightedDefenseType;
+    //multiply slider
+    private DoubleProperty damageMultiplier;
     //damage testing section
     private ObjectProperty<Type> selectedAttackType;
     private ObjectProperty<Type> selectedDefenseType;
@@ -123,6 +126,11 @@ public class FightingStats extends VBox implements CreatureListener{
             private HBox fileLoadBox;
                 private ChoiceBox<String> fileNameChoiceBox;
                 private Button loadButton;
+        private VBox multiplySliderSection;
+            private Label multiplySliderTitle;
+            private Text multiplySliderDescription;
+            private Slider multiplySlider;
+            private Label multiplySliderOutcome;
         private VBox typeCheckSection;
             private Label typeCheckTitle;
             private GridPane typeCheckGridPane;
@@ -172,6 +180,7 @@ public class FightingStats extends VBox implements CreatureListener{
         makeTypeOverview();
         makeRandomSection();
         makeFileSection();
+        makeMultiplySliderSection();
         makeTypeCheckSection();
         this.getChildren().add(advantageSettingsSection);
     }
@@ -446,6 +455,33 @@ public class FightingStats extends VBox implements CreatureListener{
         advantageSettingsSection.getChildren().add(fileSection);
     }
 
+    private void makeMultiplySliderSection() {
+        damageMultiplier = new SimpleDoubleProperty(settings.getAdvantageMultiplier());
+        settings.advantageMultiplierProperty().bind(MyBindings.roundOnDecimals(damageMultiplier, 2));
+
+        multiplySliderSection = new VBox();
+        multiplySliderSection.setSpacing(5);
+            multiplySliderTitle = new Label("Multiply slider");
+            multiplySliderTitle.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 30));
+            multiplySliderTitle.setTextFill(Color.rgb(31, 255, 113));
+            multiplySliderDescription = new Text("The factor by which an attack is stronger, when it is 'strong' against\na certain defense.\n(When an attack is weaker the inverse of this factor gets used).");
+            multiplySliderDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
+            multiplySliderDescription.setFill(Color.rgb(179, 255, 207));
+            multiplySlider = new Slider(1, 2, settings.getAdvantageMultiplier());
+            multiplySlider.setBlockIncrement(0.01);
+            multiplySlider.setMajorTickUnit(0.2);
+            multiplySlider.setMinorTickCount(9);
+            multiplySlider.setShowTickLabels(true);
+            multiplySlider.setSnapToTicks(true);
+            damageMultiplier.bind(multiplySlider.valueProperty());
+            multiplySliderOutcome = new Label();
+            multiplySliderOutcome.setTextFill(Color.rgb(31, 255, 113));
+            multiplySliderOutcome.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
+            multiplySliderOutcome.textProperty().bind(Bindings.concat("A strong attack is ", settings.advantageMultiplierProperty().asString(), "x stronger."));
+        multiplySliderSection.getChildren().addAll(multiplySliderTitle, multiplySliderDescription, multiplySlider, multiplySliderOutcome);
+        advantageSettingsSection.getChildren().add(multiplySliderSection);
+    }
+
     private void makeTypeCheckSection() {
         //initiate variables
         selectedAttackType = new SimpleObjectProperty<Type>();
@@ -461,12 +497,13 @@ public class FightingStats extends VBox implements CreatureListener{
         defenseKind.addListener((p, ov, nv) -> updateOutcome());
         defenseKind.addListener((p, ov, nv) -> updateDefenseDisplay());
         searchString.addListener((p, ov, nv) -> updateSearchSuggestions());
+        settings.advantageMultiplierProperty().addListener((p, ov, nv) -> updateOutcome());
         //appearance
         typeCheckSection = new VBox();
         typeCheckSection.setSpacing(5);
             typeCheckTitle = new Label("Damage testing");
             typeCheckTitle.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 30));
-            typeCheckTitle.setTextFill(Color.rgb(255, 240, 31));
+            typeCheckTitle.setTextFill(Color.rgb(31, 162, 255));
             typeCheckGridPane = new GridPane();
             typeCheckGridPane.setPadding(new Insets(7));
             typeCheckGridPane.setBackground(new Background(new BackgroundFill(Color.rgb(155, 59, 78), new CornerRadii(10), new Insets(0))));
@@ -565,7 +602,7 @@ public class FightingStats extends VBox implements CreatureListener{
         }
         if (defenseKind.get() == DefenseKind.TYPE) {
             double outcome = selectedAttackType.get().attacks(selectedDefenseType.get(), settings.getAdvantageMultiplier());
-            attackOutcome.set(((int) (outcome*100))*0.01);
+            attackOutcome.set((double) Math.round(outcome*100)/100);
             return;
         } else if (defenseKind.get() == DefenseKind.CREATURE) {
             if (selectedDefenseCreature.get() == null) {
@@ -573,7 +610,7 @@ public class FightingStats extends VBox implements CreatureListener{
                 return;
             }
             double outcome = AdvantageSettings.settings.calculateAttackMultiplier(selectedAttackType.get(), selectedDefenseCreature.get(), settings.getAdvantageMultiplier());
-            attackOutcome.set(((int) (outcome*100))*0.01);
+            attackOutcome.set((double) Math.round(outcome*100)/100);
             return;
         }
     }
