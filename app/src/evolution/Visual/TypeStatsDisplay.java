@@ -28,7 +28,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -55,8 +54,6 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
     private HBox TypeTypeCodeSection;
     private HBox geneModifyingSection;
     private HBox geneSafeSection;
-    private HBox sliderInfoBox;
-    private HBox typeAdvantageStrength;
     private GridPane geneTypeChart;
     private TypePieChart piechartDefense;
     private TypePieChart piechartOffense;
@@ -69,8 +66,6 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
     private SimpleBooleanProperty[] validGenes;
     private TextField shortcutTextArea;
     private Button geneSafeButton;
-    private Label typeAdvantageFactorInfo;
-    private Slider typeAdvantagetrengthSlider;
     public TypeStatsDisplay(proteinEncodingManager encodingManager, World world){
         super();
         this.world = world;
@@ -166,27 +161,6 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
         });
         geneSafeSection.getChildren().add(geneSafeButton);
         this.getChildren().add(geneSafeSection);
-        //TypeAdvantagetrength info and display
-        typeAdvantageFactorInfo = new Label("The multiplication factor for type advantages:");
-        typeAdvantageFactorInfo.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 18));
-        typeAdvantageFactorInfo.textProperty().bind(new SimpleStringProperty("The multiplication factor for type advantages: ").concat(encodingManager.getTypeAdvantageStrengthProperty().asString()));
-        sliderInfoBox = new HBox(typeAdvantageFactorInfo);
-        this.getChildren().add(sliderInfoBox);
-        //TypeAdvantagetrength slider
-        typeAdvantageStrength = new HBox();
-        typeAdvantagetrengthSlider = new Slider(1d, 2d, encodingManager.getTypeAdvantageStrength());
-        typeAdvantagetrengthSlider.setMajorTickUnit(0.1d);
-        typeAdvantagetrengthSlider.setMinorTickCount(5);
-        typeAdvantagetrengthSlider.setSnapToTicks(true);
-        typeAdvantagetrengthSlider.setBlockIncrement(0.1);
-        typeAdvantagetrengthSlider.setShowTickMarks(true);
-        typeAdvantagetrengthSlider.prefWidthProperty().bind(typeAdvantageStrength.widthProperty());
-        
-        encodingManager.getTypeAdvantageStrengthProperty().bind(Bindings.createDoubleBinding(() -> {
-            return ((double) Math.round(typeAdvantagetrengthSlider.valueProperty().get()*100))/100;
-        }, typeAdvantagetrengthSlider.valueProperty()));
-        typeAdvantageStrength.getChildren().add(typeAdvantagetrengthSlider);
-        this.getChildren().add(typeAdvantageStrength);
         //height of the whole screen
         this.minHeightProperty().bind(pieChartSection.heightProperty().add(TypeTypeCodeSection.heightProperty().add(geneModifyingSection.heightProperty().add(geneSafeSection.heightProperty()))).multiply(1.1));
     }

@@ -4,15 +4,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import javafx.beans.property.SimpleDoubleProperty;
-
 public class proteinEncodingManager {
     public interface proteinChangeListener{
         public void onProteinChange();
         public void onProteinChangeFinished();
     }
-    private double defaultTypeAdvantageStrength = 1.6;
-    private SimpleDoubleProperty typeAdvantageStrength;
     private HashMap<String, Type> encodings;
     private HashMap<Type, String> encoders;
     private String defaultSetting = "3679ABCDEHIJKLMOPS";
@@ -22,7 +18,6 @@ public class proteinEncodingManager {
 
     public proteinEncodingManager() {
         listeners = new LinkedList<proteinChangeListener>();
-        typeAdvantageStrength = new SimpleDoubleProperty(defaultTypeAdvantageStrength);
         setSetting(defaultSetting);
     }
 
@@ -124,14 +119,6 @@ public class proteinEncodingManager {
 
     public void removeListener(proteinChangeListener listener) {
         listeners.remove(listener);
-    }
-
-    public double getTypeAdvantageStrength() {
-        return typeAdvantageStrength.get();
-    }
-
-    public SimpleDoubleProperty getTypeAdvantageStrengthProperty() {
-        return typeAdvantageStrength;
     }
 
     @Override
