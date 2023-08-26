@@ -77,10 +77,6 @@ public class NameGenerator implements CreatureListener{
             availableNames.add((int) around*availableNames.size(), name);
         }
     }
-    @Override
-    public void onCreatureUpdate(Creature c) {
-        return;
-    }
 
     //getters
     public String getNameFile() {

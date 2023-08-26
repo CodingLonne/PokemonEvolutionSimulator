@@ -119,7 +119,7 @@ public class Dna {
         }
     }
 
-    public static Dna pair(Dna dna1, Dna dna2, int mutations, double crossingOverProbability, proteinEncodingManager encoder) {
+    public static Dna pair(Dna dna1, Dna dna2, double averageMutations, double crossingOverProbability, proteinEncodingManager encoder) {
         Chromosome chro1;
         Chromosome chro2;
         if (random.nextDouble()<crossingOverProbability) { //crossing over
@@ -143,6 +143,12 @@ public class Dna {
         } else {
             left = chro2;
             right = chro1;
+        }
+        int mutations;
+        if (random.nextDouble()<averageMutations-Math.floor(averageMutations)) {
+            mutations = (int) Math.floor(averageMutations);
+        } else {
+            mutations = (int) Math.ceil(averageMutations);
         }
         Dna newDna = new Dna(left, right, encoder);
         for (int i = 0; i<mutations; i++) {

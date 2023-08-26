@@ -952,10 +952,6 @@ public class CreaturesDisplay extends VBox implements CreatureListener, proteinC
         }
         updateTypeLeaderBoard();
     }
-    @Override
-    public void onCreatureUpdate(Creature c) {
-        return;
-    }
 
     public void addCreatureBiome(CreaturePlaceField p) {
         creatureBiomes.add(p);

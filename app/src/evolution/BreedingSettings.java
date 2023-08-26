@@ -8,8 +8,8 @@ import javafx.beans.property.SimpleIntegerProperty;
 public class BreedingSettings {
     private static final double defaultAverageMutations = 3;
     private static final double defaultCrossingOverProbability = 0.05;
-    private static final double defaultAttraction = 0.32;
-    private static final double defaultBreedingProximity = 50;
+    private static final double defaultAttraction = 0.7;
+    private static final double defaultBreedingProximity = 60;
     private static final int defaultIncestPrevention = 3;
 
     private DoubleProperty averageMutations;

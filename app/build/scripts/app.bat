@@ -68,7 +68,7 @@ goto fail
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\app.jar;%APP_HOME%\lib\javafx-controls-20-mac-aarch64.jar;%APP_HOME%\lib\javafx-graphics-20-mac-aarch64.jar;%APP_HOME%\lib\javafx-graphics-20.jar;%APP_HOME%\lib\javafx-base-20-mac-aarch64.jar;%APP_HOME%\lib\javafx-base-20.jar
+set CLASSPATH=%APP_HOME%\lib\app.jar;%APP_HOME%\lib\javafx-controls-20-mac-aarch64.jar;%APP_HOME%\lib\javafx-graphics-20-mac-aarch64.jar;%APP_HOME%\lib\javafx-graphics-20.jar;%APP_HOME%\lib\javafx-base-20-mac-aarch64.jar;%APP_HOME%\lib\javafx-base-20.jar;%APP_HOME%\lib\commons-math3-3.6.1.jar
 
 
 @rem Execute app

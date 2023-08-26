@@ -306,11 +306,6 @@ public class TypeStatsDisplay extends VBox implements screenManagerOwned, Creatu
     }
 
     @Override
-    public void onCreatureUpdate(Creature c) {
-        //technically not needed
-    }
-
-    @Override
     public void onCreatureDelete(Creature c) {
         HashMap<Type, Integer> defense = c.getDefenseMap();
         HashMap<Type, Integer> offense = c.getOffenseMap();

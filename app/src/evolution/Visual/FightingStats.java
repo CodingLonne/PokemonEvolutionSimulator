@@ -147,11 +147,24 @@ public class FightingStats extends VBox implements CreatureListener{
                 private TextField creatureSearchField;
                 private VBox creatureSuggestions;
                     private List<CreatureAddLabel> suggestionLabels;
-
+    private VBox behaviorSection;
+        private Label behaviorTitle;
+        private Label proximityTitle;
+        private Text proximityDescription;
+        private Slider proximitySlider;
+        private Label proximityValue;
+        private Label agressivityTitle;
+        private Text agressivityDescription;
+        private Slider agressivitySlider;
+        private Label agressivityValue;
+        private Label familyToleranceTitle;
+        private Text familyToleranceDescription;
+        private Slider familyToleranceSlider;
+        private Label familyToleranceValue;
     public FightingStats(FightingSettings fightingSettings) {
         super();
         this.setBackground(new Background(new BackgroundFill(MyColors.wheat, null, null)));
-        this.setPadding(new Insets(5, 30, 5, 20));
+        this.setPadding(new Insets(5, 20, 5, 20));
         this.setSpacing(15);
         //variables
         this.settings = fightingSettings;
@@ -159,6 +172,7 @@ public class FightingStats extends VBox implements CreatureListener{
         //build appearance
         makeHeader();
         makeAdvantagesSettings();
+        makeSliderSection();
     }
     
     private void makeHeader() {
@@ -464,7 +478,7 @@ public class FightingStats extends VBox implements CreatureListener{
             multiplySliderTitle = new Label("Multiply slider");
             multiplySliderTitle.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 30));
             multiplySliderTitle.setTextFill(Color.rgb(31, 255, 113));
-            multiplySliderDescription = new Text("The factor by which an attack is stronger, when it is 'strong' against\na certain defense.\n(When an attack is weaker the inverse of this factor gets used).");
+            multiplySliderDescription = new Text("The factor by which an attack is stronger, when it is 'strong'\nagainst a certain defense.\n(When an attack is weaker the inverse of this factor gets used).");
             multiplySliderDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
             multiplySliderDescription.setFill(Color.rgb(179, 255, 207));
             multiplySlider = new Slider(1, 2, settings.getAdvantageMultiplier());
@@ -578,6 +592,75 @@ public class FightingStats extends VBox implements CreatureListener{
         advantageSettingsSection.getChildren().add(typeCheckSection);
     }
 
+    private void makeSliderSection() {
+        behaviorSection = new VBox();
+        behaviorSection.setBackground(new Background(new BackgroundFill(Color.rgb(23, 23, 56), new CornerRadii(10), new Insets(0))));
+        behaviorSection.setBorder(new Border(new BorderStroke(Color.rgb(12, 12, 29), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(1))));
+        behaviorSection.setPadding(new Insets(5, 15, 5, 15));
+        behaviorSection.setSpacing(10);
+            behaviorTitle = new Label("Behavior");
+            behaviorTitle.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
+            behaviorTitle.setTextFill(Color.rgb(14, 246, 149));
+            //attack proximity
+            proximityTitle = new Label("Attack proximity");
+            proximityTitle.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+            proximityTitle.setTextFill(Color.rgb(130, 235, 237));
+            proximityDescription = new Text("The maximum distance an attack can reach.");
+            proximityDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
+            proximityDescription.setFill(Color.WHITE);
+            proximitySlider = new Slider(10, 100, settings.getMaximumAttackRange());
+            proximitySlider.setBlockIncrement(1);
+            proximitySlider.setMajorTickUnit(10d);
+            proximitySlider.setMinorTickCount(9);
+            proximitySlider.setShowTickLabels(true);
+            proximitySlider.setSnapToTicks(true);
+            settings.maximumAttackReachProperty().bind(proximitySlider.valueProperty());
+            proximityValue = new Label();
+            proximityValue.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
+            proximityValue.setTextFill(Color.WHITE);
+            proximityValue.textProperty().bind(MyBindings.round(settings.maximumAttackReachProperty()).asString().concat(" maximum attack range"));
+            //agressivity
+            agressivityTitle = new Label("Agressivity");
+            agressivityTitle.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+            agressivityTitle.setTextFill(Color.rgb(130, 235, 237));
+            agressivityDescription = new Text("How different 2 creatures need to be in order to display\nagressive behavior");
+            agressivityDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
+            agressivityDescription.setFill(Color.WHITE);
+            agressivitySlider = new Slider(0, 100, settings.getAgressivity()*100);
+            agressivitySlider.setBlockIncrement(1);
+            agressivitySlider.setMajorTickUnit(10d);
+            agressivitySlider.setMinorTickCount(9);
+            agressivitySlider.setShowTickLabels(true);
+            agressivitySlider.setSnapToTicks(true);
+            settings.agressivityProperty().bind(agressivitySlider.valueProperty().divide(100));
+            agressivityValue = new Label();
+            agressivityValue.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
+            agressivityValue.setTextFill(Color.WHITE);
+            agressivityValue.textProperty().bind(MyBindings.round(settings.agressivityProperty().multiply(100)).asString().concat("% difference leads to agressivity"));
+            //generation
+            familyToleranceTitle = new Label("Incest prevention");
+            familyToleranceTitle.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
+            familyToleranceTitle.setTextFill(Color.rgb(130, 235, 237));
+            familyToleranceDescription = new Text("The amount of generations to check back to determine\nfamily tolerance. Closely related creatures will not present\nhostile behavior because of this tolerance.");
+            familyToleranceDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
+            familyToleranceDescription.setFill(Color.WHITE);
+            familyToleranceSlider = new Slider(0, 5, settings.getInfightingProtection());
+            familyToleranceSlider.setBlockIncrement(1);
+            familyToleranceSlider.setMajorTickUnit(1);
+            familyToleranceSlider.setMinorTickCount(0);
+            familyToleranceSlider.setShowTickLabels(true);
+            familyToleranceSlider.setSnapToTicks(true);
+            settings.infightingProtectionProperty().bind(familyToleranceSlider.valueProperty());
+            familyToleranceValue = new Label();
+            familyToleranceValue.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
+            familyToleranceValue.setTextFill(Color.WHITE);
+            familyToleranceValue.textProperty().bind(settings.infightingProtectionProperty().asString().concat(" generations back"));
+        behaviorSection.getChildren().addAll(behaviorTitle,
+                                             proximityTitle, proximityDescription, proximitySlider, proximityValue,
+                                             agressivityTitle, agressivityDescription, agressivitySlider, agressivityValue,
+                                             familyToleranceTitle, familyToleranceDescription, familyToleranceSlider, familyToleranceValue);
+        this.getChildren().add(behaviorSection);
+    }
     //help functions
     private void updateFileList() {
         List<String> fileList = Arrays.asList(AdvantageSettings.settings.getConfigFolder().listFiles()).stream().map(x -> x.getName()).filter(x -> x.charAt(0)!='.').toList();
@@ -650,9 +733,6 @@ public class FightingStats extends VBox implements CreatureListener{
     public void onCreatureDelete(Creature c) {
         creatures.remove(c);
     }
-
-    @Override
-    public void onCreatureUpdate(Creature c) {}
 }
 
 enum DefenseKind {

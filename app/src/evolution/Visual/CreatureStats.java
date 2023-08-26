@@ -15,6 +15,7 @@ import evolution.Visual.VisualElements.MyColors;
 import evolution.Visual.VisualElements.MyStatsBar;
 import evolution.Visual.VisualElements.TypePieChart;
 import evolution.World.CreatureClickListener;
+import evolution.World.CreatureUpdateListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -43,7 +44,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 
-public class CreatureStats extends VBox implements screenManagerOwned, proteinChangeListener, CreatureClickListener{
+public class CreatureStats extends VBox implements screenManagerOwned, proteinChangeListener, CreatureClickListener, CreatureUpdateListener{
     private SimpleStringProperty title;
     private SimpleBooleanProperty creatureSelected;
     private Creature selectedCreature;
@@ -153,6 +154,7 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
                                                                           .otherwise(new Background(new BackgroundFill(MyColors.dutchWhite.grayscale(), null, new Insets(0)))));
         relationshipSection.setAlignment(Pos.TOP_CENTER);
         relationshipSection.prefWidthProperty().bind(this.widthProperty().multiply(0.9));
+        relationshipSection.setHgap(15);
             //header
             Label relationShipLabel = new Label("Relationships");
             relationShipLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 30));
@@ -535,20 +537,20 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         // onProteinChangeFinished in CreatureStats
     }
 
-    public void updateRelationShips() {
-        LinkedList<Creature> loves = this.selectedCreature.getLoves();
-        LinkedList<Creature> enemies = this.selectedCreature.getEnemies();
+    public void updateRelationShips(Creature c) {
+        LinkedList<Creature> loves = c.getLoves();
+        LinkedList<Creature> enemies = c.getEnemies();
         for (int i=0; i<maxRelationshipList; i++) {
             if (i<loves.size()) {
                 loverNames[i].setCreature(loves.get(i));
-                loverDistances[i].setText(Integer.toString((int) this.selectedCreature.getDistanceTo(loves.get(i))));
+                loverDistances[i].setText(Integer.toString((int) c.getDistanceTo(loves.get(i))));
             } else {
                 loverNames[i].setCreature(null);
                 loverDistances[i].setText("-");
             }
             if (i<enemies.size()) {
                 enemyNames[i].setCreature(enemies.get(i));
-                enemyDistances[i].setText(Integer.toString((int) this.selectedCreature.getDistanceTo(enemies.get(i))));
+                enemyDistances[i].setText(Integer.toString((int) c.getDistanceTo(enemies.get(i))));
             } else {
                 enemyNames[i].setCreature(null);
                 enemyDistances[i].setText("-");
@@ -557,6 +559,9 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
     }
 
     public void disconnect(Creature c) {
+        if (c != null) {
+            c.removeCreatureUpdateListener(this);
+        }
         title.unbind();
         titleLabel.textFillProperty().unbind();
         titleLabel.setTextFill(Color.BLACK);
@@ -591,8 +596,9 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         }
     }
     public void connect(Creature c) {
-        title.bind(c.nameProperty());
         if (c != null) {
+            c.addCreatureUpdateListener(this);
+            title.bind(c.nameProperty());
             //titleLabel.setTextFill(c.mostProminentType().getColor());
             titleLabel.textFillProperty().bind(Bindings.when(alive)
                 .then(c.mostProminentType().getColor())
@@ -602,6 +608,8 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
             energyBar.progressProperty().bind(c.energyProperty().divide(c.maxEnergyProperty()));
             ageInfo.textProperty().bind(Bindings.concat("Age: ", c.ageProperty().asString()));
             alive.bind(c.aliveProperty());
+            //relationships
+            updateRelationShips(c);
             //type map
             connectTypeMapTo(c);
             //visual type map
@@ -629,9 +637,10 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
         disconnect(selectedCreature);
         connect(c);
         selectedCreature = c;
+        /* 
         if (this.selectedCreature != null) {
-            updateRelationShips();
-        }
+            updateRelationShips(selectedCreature);
+        }*/
     }
 
     @Override
@@ -646,5 +655,10 @@ public class CreatureStats extends VBox implements screenManagerOwned, proteinCh
                         typeOverviewSection.getHeight()+
                         familyTreeSection.getHeight()+
                         childrenListSection.getHeight())*1.2);
+    }
+    @Override
+    public void onCreatureUpdate(Creature c) {
+        updateChildrenList(c);
+        updateRelationShips(c);
     }
 }

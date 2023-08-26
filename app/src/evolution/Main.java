@@ -23,6 +23,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
 public class Main extends Application{
+    private World mainLogic;
     public static void main(String[] args) {
         launch(args);
     }
@@ -33,7 +34,7 @@ public class Main extends Application{
         proteinEncodingManager encoder = new proteinEncodingManager();
         BreedingSettings breedingSettings = new BreedingSettings();
         FightingSettings fightingSettings = new FightingSettings();
-        World mainLogic = new World(600, encoder, breedingSettings, fightingSettings);
+        mainLogic = new World(600, encoder, breedingSettings, fightingSettings);
         //grid
         BorderPane wholeScreen = new BorderPane();
         //different screens
@@ -70,7 +71,7 @@ public class Main extends Application{
                     creatureStats.setPadding(new Insets(5, 30, 5, 20));
                     creatureStats.setPrefWidth(550);
 
-                    BreedingStats breedingSettingsDisplay = new BreedingStats(breedingSettings, nameGranter);
+                    BreedingStats breedingSettingsDisplay = new BreedingStats(breedingSettings, nameGranter, fightingSettings);
                     breedingSettingsDisplay.setPrefWidth(550);
 
                     FightingStats fightingSettingsDisplay = new FightingStats(fightingSettings);
@@ -101,6 +102,7 @@ public class Main extends Application{
         mainLogic.addWorldListener(breedingSettingsDisplay);
         mainLogic.addCreatureClickListener(creatureStats);
         mainLogic.addCreatureClickListener(screenSwapper);
+        mainLogic.addPairingListener(world);
         creatureOverview.addCreatureBiome(mainLogic);
         encoder.addListener(creatureStats);
         encoder.addListener(typeStats);
@@ -116,7 +118,7 @@ public class Main extends Application{
 
 
         
-        
+        /* 
         int mutations = 3;
         double crossingOver = 0.1;
         for (int x5=0; x5<32; x5++) {
@@ -138,7 +140,7 @@ public class Main extends Application{
         for (int x0=0; x0<1; x0++) { //-512+64*x4, -210
             mainLogic.addCreature(Relationship.breed(mainLogic, -512+1024*x0, -50, mainLogic.getCreature(60+x0*2), mainLogic.getCreature(60+x0*2+1), mutations, crossingOver, encoder));
         }
-        
+        */
         
         /* 
         for (int x=0; x<45; x++) {
@@ -173,5 +175,9 @@ public class Main extends Application{
             mainLogic.getCreature(x).setAge(50);
         }*/
         
+    }
+
+    public void stop() {
+        mainLogic.shutdown();
     }
 }

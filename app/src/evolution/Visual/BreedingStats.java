@@ -9,6 +9,7 @@ import java.util.Map;
 
 import evolution.BreedingSettings;
 import evolution.Creature;
+import evolution.FightingSettings;
 import evolution.NameGenerator;
 import evolution.Relationship;
 import evolution.Relationship.Relation;
@@ -67,6 +68,7 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
     private IntegerProperty incestPrevention;
     private DoubleProperty breedingProximity;
     private NameGenerator nameGenerator;
+    private FightingSettings fightingSettings;
     private File homeFolder;
     private List<Creature> creatures;
     private ObjectProperty<Creature> selectedGirlfriend;
@@ -116,14 +118,15 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
     private LinkedList<CreatureAddLabel> girlfriendSuggestionLabels;
     private LinkedList<CreatureAddLabel> boyfriendSuggestionLabels;
     private LinkedList<MultiFacedDisplay<Relationship.Relation>> feelingDisplays;
-    public BreedingStats(BreedingSettings breedingSettings, NameGenerator nameGenerator) {
+    public BreedingStats(BreedingSettings breedingSettings, NameGenerator nameGenerator, FightingSettings fightingSettings) {
         super();
         this.setBackground(new Background(new BackgroundFill(MyColors.wheat, null, null)));
-        this.setPadding(new Insets(5, 30, 5, 20));
+        this.setPadding(new Insets(5, 20, 5, 20));
         this.setSpacing(15);
         //initiate variables
         settings = breedingSettings;
         this.nameGenerator = nameGenerator;
+        this.fightingSettings = fightingSettings;
         averageMutations = new SimpleDoubleProperty(breedingSettings.getAverageMutations());
         crossingOverProbability = new SimpleDoubleProperty(breedingSettings.getCrossingOverProbability());
         attraction = new SimpleDoubleProperty(breedingSettings.getAttraction());
@@ -191,7 +194,7 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
             attractionLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
             Text attractionDescription = new Text("The percentage that 2 creatures need to have in common to fall\nin love.");
             attractionDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-            attractionSlider = new Slider(0, 100, settings.getAttraction());
+            attractionSlider = new Slider(0, 100, settings.getAttraction()*100);
             attractionSlider.setBlockIncrement(1);
             attractionSlider.setMajorTickUnit(10);
             attractionSlider.setMinorTickCount(4);
@@ -200,7 +203,7 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
             attraction.bind(attractionSlider.valueProperty().multiply(0.01));
             Label attractionValue = new Label();
             attractionValue.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-            attractionValue.textProperty().bind(attraction.multiply(100).asString().concat("% in common causes attraction"));
+            attractionValue.textProperty().bind(attraction.asString().concat("% in common causes attraction"));
             //generation
             Label incestPreventionLabel = new Label("Incest prevention");
             incestPreventionLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
@@ -221,7 +224,7 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
             breedingProximityLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
             Text breedingProximityDescription = new Text("The distance at which 2 creatures can succesfully breed.");
             breedingProximityDescription.setFont(Font.font("Comic Sans MS", FontWeight.NORMAL, FontPosture.REGULAR, 15));
-            breedingProximitySlider = new Slider(Creature.defaultSize, 50, settings.getBreedingProximity());
+            breedingProximitySlider = new Slider(Creature.defaultSize*2, 200, settings.getBreedingProximity());
             breedingProximitySlider.setBlockIncrement(1);
             breedingProximitySlider.setMajorTickUnit(10d);
             breedingProximitySlider.setMinorTickCount(4);
@@ -418,6 +421,8 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
                     dayLabel.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, FontPosture.REGULAR, 20));
                     settings.attractionProperty().addListener((p, nv, ov) -> updateCompatibilityDisplay());
                     settings.incestPreventionProperty().addListener((p, nv, ov) -> updateCompatibilityDisplay());
+                    fightingSettings.agressivityProperty().addListener((p, nv, ov) -> updateCompatibilityDisplay());
+                    fightingSettings.infightingProtectionProperty().addListener((p, nv, ov) -> updateCompatibilityDisplay());
                     compatibilityDisplay.add(dayLabel, 0, 0);
                     for (int i=0; i<maxPredictions; i++) {
                         Label smallDayLabel = new Label();
@@ -473,7 +478,7 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
         int day;
         for (int i=0; i<maxOptions; i++) {
             day = currentDay.get()+i;
-            feelingDisplays.get(day).setValue(Relationship.evaluate(selectedBoyfriend.get(), selectedGirlfriend.get(), day, settings.getIncestPrevention(),  3, settings.getAttraction(), 0.5));
+            feelingDisplays.get(day).setValue(Relationship.evaluate(selectedBoyfriend.get(), selectedGirlfriend.get(), day, settings.getIncestPrevention(),  fightingSettings.getInfightingProtection(), settings.getAttraction(), fightingSettings.getAgressivity()));
         }
     }
 
@@ -498,11 +503,6 @@ public class BreedingStats extends VBox implements CreatureListener, WorldListen
     @Override
     public void onCreatureDelete(Creature c) {
         creatures.remove(c);
-    }
-
-    @Override
-    public void onCreatureUpdate(Creature c) {
-        return;
     }
 
     @Override

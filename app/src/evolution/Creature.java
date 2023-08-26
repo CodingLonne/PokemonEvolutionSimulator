@@ -1,10 +1,12 @@
 package evolution;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 
 import evolution.Relationship.Relation;
 import evolution.World.CreatureClickListener;
+import evolution.World.CreatureUpdateListener;
 import evolution.proteinEncodingManager.proteinChangeListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -12,11 +14,13 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 public class Creature implements proteinChangeListener{
     public final static double defaultSize = 16;
     public final static double defaultSpeed = 2;
-    public final static double defaultSense = 100;
+    public final static double defaultSense = 100;//100;
     public final static double defaultMaxHealth = 100;
     public final static double defaultMaxEnergy = 200;
     private SimpleDoubleProperty maxHealth;
@@ -35,7 +39,7 @@ public class Creature implements proteinChangeListener{
 
     private SimpleBooleanProperty alive;
     private SimpleBooleanProperty isSleeping;
-    private double horniness;
+    private int horniness;
 
     private SimpleDoubleProperty xProperty;
     private SimpleDoubleProperty yProperty;
@@ -50,10 +54,18 @@ public class Creature implements proteinChangeListener{
     private HashMap<Creature, Relation> relationships;
     private SimpleIntegerProperty kills;
 
+    private Comparator<Creature> byDistance = (c1, c2) -> (int) Math.signum(this.getDistanceTo(c1)-this.getDistanceTo(c2));
+
     private HashMap<Type, Integer> proteinDefense;
     private HashMap<Type, Integer> proteinOffense;
 
     private LinkedList<CreatureClickListener> creatureClickListeners;
+    private LinkedList<CreatureUpdateListener> creatureUpdateListeners;
+
+    private double facingDirection; //radians
+
+    private PairingDance pairingDance;
+    private boolean isPairing;
 
     public Creature(World world, double x, double y, Dna dna, double health, double energy, proteinEncodingManager encoder) {
         xProperty = new SimpleDoubleProperty(x);
@@ -68,8 +80,17 @@ public class Creature implements proteinChangeListener{
         this.energy = new SimpleDoubleProperty(energy);
 
         this.alive = new SimpleBooleanProperty(true);
-        this.horniness = 0d;
+        this.isPairing = false;
+        this.horniness = 0;
         this.isSleeping = new SimpleBooleanProperty(false);
+        this.isSleeping.addListener(new ChangeListener<Boolean>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                setSleeping(newValue);
+            }
+            
+        });
 
         proteinDefense = dna.getDefenseMap();
         proteinOffense = dna.getOffenseMap();
@@ -77,13 +98,21 @@ public class Creature implements proteinChangeListener{
         relationships = new HashMap<>();
         loves = new LinkedList<Creature>();
         enemies = new LinkedList<Creature>();
+        world.getBreedingSettings().attractionProperty().addListener((p, ov, nv) -> relationships.clear());
+        world.getBreedingSettings().incestPreventionProperty().addListener((p, ov, nv) -> relationships.clear());
+        world.getFightingSettings().agressivityProperty().addListener((p, ov, nv) -> relationships.clear());
+        world.getFightingSettings().infightingProtectionProperty().addListener((p, ov, nv) -> relationships.clear());
+
         children = new LinkedList<Creature>();
         childrenAmount = new SimpleIntegerProperty(0);
         kills = new SimpleIntegerProperty(0);
 
         encoder.addListener(this);
         creatureClickListeners = new LinkedList<>();
+        creatureUpdateListeners = new LinkedList<>();
         this.world = world;
+
+        facingDirection = angleTowards(0, 0);
     }
 
     public Creature(World world, double x, double y, Dna dna, proteinEncodingManager encoder) {
@@ -92,6 +121,68 @@ public class Creature implements proteinChangeListener{
 
     public Creature(World world, double x, double y, proteinEncodingManager encoder) {
         this(world, x, y, Dna.randomDna(encoder), defaultMaxHealth, defaultMaxEnergy, encoder);
+    }
+
+    public void observe() {
+        if (this.isSleeping.get()) return;
+
+        loves.clear();
+        enemies.clear();
+        for (Creature c: world.getCreatures()) {
+            if (!c.getSleeping() && getDistanceTo(c)<sense.get()) {
+                if (relationships.containsKey(c)) {
+                    if (relationships.get(c) == Relation.LOVE && !c.isPairing()) loves.add(c);
+                    else if (relationships.get(c) == Relation.HATE) enemies.add(c);
+                } else {
+                    Relation relation = Relationship.evaluate(this, c, world.getDay(), world.getBreedingSettings().getIncestPrevention(), 0, world.getBreedingSettings().getAttraction(), world.getFightingSettings().getAgressivity());
+                    relationships.put(c, relation);
+                    if (relation == Relation.LOVE && !c.isPairing()) loves.add(c);
+                    else if (relation == Relation.HATE) enemies.add(c);
+                }
+            }
+        }
+        loves.sort(byDistance);
+        enemies.sort(byDistance);
+        this.updateCreature();
+    }
+
+    public void act() {
+        if (this.isSleeping.get()) return;
+
+        Relation feeling = getFeelingPriority();
+        if (isPairing) {
+            if (getDistanceTo(pairingDance.getPairingXPosition(this), pairingDance.getPairingYPosition(this)) < this.speed.get()) {
+                setX(pairingDance.getPairingXPosition(this));
+                setY(pairingDance.getPairingYPosition(this));
+                pairingDance.arrived(this);
+            } else {
+                facingDirection = angleTowards(pairingDance.getPairingXPosition(this), pairingDance.getPairingYPosition(this));
+                move();
+            }
+        } else if (feeling == Relation.HATE) {
+            if (getDistanceTo(enemies.getFirst())<world.getFightingSettings().getMaximumAttackRange()*0.5) {
+                facingDirection = angleTowards(enemies.getFirst());
+            } else if (getDistanceTo(enemies.getFirst())<world.getFightingSettings().getMaximumAttackRange()) {
+                facingDirection = angleTowards(enemies.getFirst());
+                move();
+            } else {
+                facingDirection = angleTowards(enemies.getFirst());
+                move();
+            }
+        } else if (feeling == Relation.LOVE) {
+            if (world.attemptToStartPairingDance(this, loves.getFirst())) {
+                facingDirection = angleTowards(pairingDance.getPairingXPosition(this), pairingDance.getPairingYPosition(this));
+                move();
+            } else {
+                facingDirection = angleTowards(loves.getFirst());
+                move();
+            }
+        } else if (isOutsideWall()) {
+            facingDirection = angleTowards(0, 0);
+            move();
+        } else {
+            move();
+        }
     }
 
     public Type mostProminentType() {
@@ -105,10 +196,57 @@ public class Creature implements proteinChangeListener{
         }
         return gene;
     }
+    //commands
+    public void startPairingDance(PairingDance pairingDance) {
+        this.pairingDance = pairingDance;
+        this.isPairing = true;
+    }
 
+    public void stopPairingDance() {
+        this.pairingDance = null;
+        this.isPairing = false;
+    }
+
+    //small calculations to help thinking
+    public double getDistanceTo(double x, double y) {
+        return Math.sqrt(Math.pow(this.getX()-x, 2)+Math.pow(this.getY()-y, 2));
+    }
 
     public double getDistanceTo(Creature other) {
         return Math.sqrt(Math.pow(this.getX()-other.getX(), 2)+Math.pow(this.getY()-other.getY(), 2));
+    }
+
+    private boolean isOutsideWall() {
+        return Math.pow(getX(), 2)+Math.pow(getY(), 2)>Math.pow(world.getWorldSize(), 2);
+    }
+
+    private double angleTowards(double x, double y) {
+        return Math.atan2(y-this.getY(), x-this.getX());
+    }
+
+    private double angleTowards(Creature c) {
+        return angleTowards(c.getX(), c.getY());
+    }
+
+    private void move() {
+        setX(getX()+Math.cos(facingDirection)*getSpeed());
+        setY(getY()+Math.sin(facingDirection)*getSpeed());
+    }
+
+    private Relation getFeelingPriority() {
+        if (loves.isEmpty() && enemies.isEmpty()) {
+            return Relation.NEUTRAL;
+        } else if (!loves.isEmpty() && !enemies.isEmpty()) {
+            if (this.getDistanceTo(loves.get(0))<this.getDistanceTo(enemies.get(0))) {
+                return Relation.LOVE;
+            } else {
+                return Relation.HATE;
+            }
+        } else if (loves.isEmpty()) {
+            return Relation.HATE;
+        } else {
+            return Relation.LOVE;
+        }
     }
 
     //getters
@@ -204,6 +342,10 @@ public class Creature implements proteinChangeListener{
         return father;
     }
 
+    public boolean isPairing() {
+        return isPairing;
+    }
+
     //setters
     public void giveName(String name) {
         this.name.set(name);
@@ -254,8 +396,23 @@ public class Creature implements proteinChangeListener{
     }
 
     public void setSleeping(boolean b) {
-        isSleeping.set(b);
+        if (b) {
+            fallAsleep();
+        } else {
+            wakeUp();
+        }
     }
+
+    public void wakeUp() {
+        facingDirection = angleTowards(0, 0);
+        isSleeping.set(false);
+    }
+
+    public void fallAsleep() {
+        isSleeping.set(true);
+        loves.clear();
+        enemies.clear();
+    } 
 
     public void setParents(Creature m, Creature f) {
         mother = m;
@@ -345,6 +502,14 @@ public class Creature implements proteinChangeListener{
     public void addCreatureClickListener(CreatureClickListener listener) {
         creatureClickListeners.add(listener);
     }
+
+    public void addCreatureUpdateListener(CreatureUpdateListener listener) {
+        creatureUpdateListeners.add(listener);
+    }
+
+    public void removeCreatureUpdateListener(CreatureUpdateListener listener) {
+        creatureUpdateListeners.remove(listener);
+    }
     
     //events
     @Override
@@ -352,7 +517,13 @@ public class Creature implements proteinChangeListener{
         dna.update();
         proteinDefense = dna.getDefenseMap();
         proteinOffense = dna.getOffenseMap();
-        this.world.updateCreature(this);
+        this.updateCreature();
+    }
+
+    public void updateCreature() {
+        for (CreatureUpdateListener listener : creatureUpdateListeners) {
+            listener.onCreatureUpdate(this);
+        }
     }
 
     @Override
